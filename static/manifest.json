@@ -1,0 +1,15 @@
+{
+  "name": "하루 세 아이",
+  "short_name": "하루세아이",
+  "description": "유치원 교사의 아이 관찰 기록",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FCFCFB",
+  "theme_color": "#FCFCFB",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

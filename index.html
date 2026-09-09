@@ -1,0 +1,1396 @@
+<title>하루 세 아이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#FCFCFB;
+  --surface:#FFFFFF;
+  --surface-2:#F3F5F3;
+  --ink:#1A2522;
+  --ink-2:#4E5A56;
+  --ink-3:#6E7A76;
+  --line:#DDE2DF;
+  --line-2:#B4BEBA;
+  --accent:#2F6B5C;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E6F0EC;
+  --warn:#8C5411;
+  --warn-soft:#FBF0E1;
+  --danger:#9E3617;
+  --danger-line:#D8B3A8;
+  --mood-a:#2E5C86;
+  --mood-b:#6E9DC4;
+  --mood-c:#9A9E9B;
+  --mood-d:#D69440;
+  --mood-e:#96520F;
+  --shadow:0 1px 2px rgba(26,37,34,.06), 0 8px 24px rgba(26,37,34,.06);
+  --sheet-shadow:0 -2px 32px rgba(26,37,34,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#131A18;
+    --surface:#1C2422;
+    --surface-2:#242E2B;
+    --ink:#E7EDEA;
+    --ink-2:#AEBAB6;
+    --ink-3:#8A9591;
+    --line:#333F3B;
+    --line-2:#4C5A55;
+    --accent:#5FA894;
+    --accent-ink:#0E1614;
+    --accent-soft:#1E2E2A;
+    --warn:#D9A45C;
+    --warn-soft:#2B241A;
+    --danger:#E3937A;
+    --danger-line:#553A31;
+    --mood-a:#8FBBE0;
+    --mood-b:#5E90B8;
+    --mood-c:#767C79;
+    --mood-d:#C89149;
+    --mood-e:#E5A85E;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+    --sheet-shadow:0 -2px 32px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131A18;
+  --surface:#1C2422;
+  --surface-2:#242E2B;
+  --ink:#E7EDEA;
+  --ink-2:#AEBAB6;
+  --ink-3:#8A9591;
+  --line:#333F3B;
+  --line-2:#4C5A55;
+  --accent:#5FA894;
+  --accent-ink:#0E1614;
+  --accent-soft:#1E2E2A;
+  --warn:#D9A45C;
+  --warn-soft:#2B241A;
+  --danger:#E3937A;
+  --danger-line:#553A31;
+  --mood-a:#8FBBE0;
+  --mood-b:#5E90B8;
+  --mood-c:#767C79;
+  --mood-d:#C89149;
+  --mood-e:#E5A85E;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  --sheet-shadow:0 -2px 32px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent;
+}
+body.locked{position:fixed;left:0;right:0;overflow:hidden;width:100%}
+button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer}
+textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums}
+/* 한글이 섞인 자리에는 mono 대신 tnum — Plex Mono에 한글이 없어 자간이 벌어진다 */
+.tnum{font-variant-numeric:tabular-nums}
+
+#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
+
+/* ---------- alert ---------- */
+.alert{
+  position:sticky;top:0;z-index:40;
+  background:var(--danger);color:#fff;
+  padding:11px 16px;font-size:13.5px;line-height:1.5;font-weight:500;
+}
+.alert b{font-weight:700}
+
+/* ---------- header ---------- */
+.top{
+  position:sticky;top:0;z-index:20;
+  background:var(--ground);
+  border-bottom:1px solid var(--line);
+}
+.top-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 8px}
+.today{font-size:13px;color:var(--ink-2);letter-spacing:.02em}
+.today b{color:var(--ink);font-weight:600}
+.count-today{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+.slots{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
+.slots::-webkit-scrollbar{display:none}
+.slot{
+  flex:0 0 auto;padding:11px 14px;border-radius:999px;min-height:44px;
+  border:1px solid var(--line-2);color:var(--ink-2);
+  font-size:13.5px;font-weight:500;white-space:nowrap;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.slot[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+
+/* ---------- body ---------- */
+main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
+.sec-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.sec-title{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink-2)}
+.sec-note{font-size:12px;color:var(--ink-3)}
+
+/* gap callout — the one lifted element on the page */
+.gaps{
+  background:var(--warn-soft);
+  border-left:3px solid var(--warn);
+  border-radius:2px 10px 10px 2px;
+  padding:13px 15px;
+}
+.gaps .sec-title{color:var(--warn)}
+.gap-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;align-items:center}
+.gap-chip{
+  display:inline-flex;align-items:baseline;gap:6px;
+  background:var(--surface);border:1px solid var(--line-2);
+  padding:6px 11px;border-radius:999px;font-size:14px;font-weight:500;
+}
+.gap-chip .d{font-size:11.5px;color:var(--warn);font-weight:600}
+.gap-more{font-size:12.5px;color:var(--warn);font-weight:600}
+.gaps-clear{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+
+/* child grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.card{
+  background:var(--surface);border:1px solid var(--line-2);border-radius:12px;
+  padding:12px 13px;text-align:left;display:flex;flex-direction:column;gap:7px;
+  min-height:78px;transition:border-color .12s,transform .06s;
+}
+.card:active{transform:scale(.985)}
+.card.done{border-color:var(--accent);background:var(--accent-soft)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.name{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.card-meta{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
+.card-meta .since.stale{color:var(--warn);font-weight:600}
+.mini-mood{display:inline-block;width:22px;height:4px;border-radius:2px;flex:0 0 auto}
+
+/* ---------- bottom nav ---------- */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.nav button{padding:11px 0 13px;font-size:12px;font-weight:500;color:var(--ink-3);display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.nav .ico{font-size:17px;line-height:1}
+
+/* ---------- sheet ---------- */
+.scrim{position:fixed;inset:0;background:rgba(16,24,22,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  max-width:520px;margin:0 auto;
+  background:var(--surface);border-radius:18px 18px 0 0;
+  box-shadow:var(--sheet-shadow);
+  transform:translateY(102%);
+  visibility:hidden;
+  transition:transform .22s cubic-bezier(.2,.8,.3,1), visibility 0s .22s;
+  max-height:88vh;display:flex;flex-direction:column;
+}
+.sheet.open{transform:translateY(0);visibility:visible;transition:transform .22s cubic-bezier(.2,.8,.3,1), visibility 0s}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 14px 10px 18px;border-bottom:1px solid var(--line)}
+.sheet-title{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.sheet-sub{font-size:12px;color:var(--ink-3);margin-top:1px}
+.sheet-close{font-size:14px;color:var(--ink-2);padding:12px;margin:-6px;min-width:44px;min-height:44px}
+.sheet-body{padding:14px 18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;-webkit-overflow-scrolling:touch}
+.field-label{font-size:12px;font-weight:600;letter-spacing:.05em;color:var(--ink-2);margin-bottom:8px}
+.field-hint{font-weight:400;color:var(--ink-3);letter-spacing:0}
+
+.tag-group{margin-bottom:11px}
+.tag-group-name{font-size:11px;color:var(--ink-3);margin-bottom:5px;letter-spacing:.05em}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag{
+  padding:12px 13px;border-radius:8px;border:1px solid var(--line-2);min-height:44px;
+  font-size:13.5px;color:var(--ink-2);background:var(--surface);
+}
+.tag[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.tag.retired{border-style:dashed}
+
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.mood{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:10px 2px 9px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);
+}
+.mood .em{font-size:21px;line-height:1}
+.mood .lb{font-size:10.5px;color:var(--ink-3);letter-spacing:-.02em}
+.mood .bar{width:100%;height:4px;border-radius:2px}
+.mood[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-2)}
+.mood[aria-pressed="true"] .lb{color:var(--ink);font-weight:600}
+
+.note-in{
+  width:100%;border:1px solid var(--line-2);border-radius:9px;
+  padding:10px 12px;background:var(--surface);resize:none;font-size:16px;
+}
+.note-in::placeholder{color:var(--ink-3);font-size:14.5px}
+
+.sheet-foot{padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:12px}
+.btn{
+  flex:1;padding:14px;border-radius:11px;font-size:15.5px;font-weight:600;
+  background:var(--accent);color:var(--accent-ink);
+}
+.btn:disabled{background:var(--surface-2);color:var(--ink-2);cursor:default}
+.btn-ghost{flex:0 0 auto;padding:14px 16px;border-radius:11px;border:1px solid var(--danger-line);font-size:14.5px;color:var(--danger);background:var(--surface)}
+
+/* ---------- child detail ---------- */
+.picker{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.picker::-webkit-scrollbar{display:none}
+.pick{flex:0 0 auto;padding:11px 14px;border-radius:999px;min-height:44px;border:1px solid var(--line-2);font-size:13.5px;color:var(--ink-2);white-space:nowrap}
+.pick[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:600}
+
+.child-name{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0}
+.stat-row{display:flex;gap:20px;padding:2px 0 4px}
+.stat .v{font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.stat .k{font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+
+.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;align-items:end;height:76px}
+.dist-col{display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.dist-n{font-size:11.5px;color:var(--ink-2);font-weight:500}
+.dist-bar{width:100%;border-radius:4px 4px 0 0;min-height:3px}
+.dist-lb{font-size:15px;line-height:1}
+.dist-cap{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:5px}
+.dist-cap span{font-size:10px;color:var(--ink-3);text-align:center;letter-spacing:-.02em}
+
+.freq{display:flex;flex-direction:column;gap:7px}
+.freq-row{display:grid;grid-template-columns:1fr 34px;gap:9px;align-items:center}
+.freq-label{font-size:13.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.freq-track{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.freq-fill{height:100%;background:var(--accent);border-radius:3px}
+.freq-n{font-size:12px;color:var(--ink-3);text-align:right}
+
+.log{display:flex;flex-direction:column;gap:0}
+.log-item{display:grid;grid-template-columns:60px 1fr;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+.log-when{font-size:11.5px;color:var(--ink-3);line-height:1.45}
+.log-when b{display:block;color:var(--ink-2);font-weight:600}
+.log-body{display:flex;flex-direction:column;gap:5px}
+.log-tags{display:flex;flex-wrap:wrap;gap:5px}
+.log-tag{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2)}
+.log-mood{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2)}
+.log-note{font-size:14px;color:var(--ink);line-height:1.55}
+
+/* ---------- data tab ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.panel p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.6}
+.row-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{padding:12px 14px;border-radius:9px;border:1px solid var(--line-2);font-size:13.5px;font-weight:500;background:var(--surface);min-height:44px}
+.btn-sm.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn-sm.danger{color:var(--danger);border-color:var(--danger-line)}
+
+.rows{display:flex;flex-direction:column;gap:7px}
+.row-edit{display:grid;grid-template-columns:1fr 44px;gap:7px;align-items:center}
+.row-in{
+  width:100%;border:1px solid var(--line-2);border-radius:9px;
+  padding:11px 12px;background:var(--ground);font-size:16px;min-height:44px;
+}
+.row-del{
+  min-height:44px;border:1px solid var(--line-2);border-radius:9px;
+  color:var(--ink-3);font-size:17px;line-height:1;
+}
+.row-add{align-self:flex-start;padding:11px 14px;border-radius:9px;border:1px dashed var(--line-2);font-size:13.5px;color:var(--ink-2);min-height:44px}
+
+.edit-area{width:100%;min-height:112px;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;background:var(--ground);font-size:16px;line-height:1.65;resize:vertical}
+.out{width:100%;min-height:100px;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;background:var(--ground);font-size:12px;line-height:1.5;resize:vertical;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+/* banner */
+.banner{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--accent-soft);border:1px solid var(--line-2);
+  border-radius:10px;padding:11px 13px;font-size:13px;color:var(--ink-2);
+}
+.banner.warn{background:var(--warn-soft);border-color:var(--warn)}
+.banner b{color:var(--ink);font-weight:600}
+.banner button{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap;padding:6px 0}
+.banner.warn button{color:var(--warn)}
+
+.toast{
+  position:fixed;left:50%;bottom:78px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:999px;
+  font-size:13.5px;font-weight:500;z-index:70;opacity:0;pointer-events:none;
+  transition:opacity .18s,transform .18s;max-width:88%;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.empty{padding:28px 6px;text-align:center;color:var(--ink-3);font-size:13.5px;line-height:1.7}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+
+<div id="app">
+  <div class="alert" id="alertBar" role="alert" hidden></div>
+  <div class="top">
+    <div class="top-row">
+      <div class="today" id="todayLine"></div>
+      <div class="count-today tnum" id="countLine"></div>
+    </div>
+    <div class="slots" id="slotBar"></div>
+  </div>
+  <main id="view"></main>
+  <nav class="nav">
+    <div class="nav-inner">
+      <button data-tab="record" aria-current="page"><span class="ico">✎</span>기록</button>
+      <button data-tab="child"><span class="ico">◔</span>아이별</button>
+      <button data-tab="data"><span class="ico">⤓</span>데이터</button>
+    </div>
+  </nav>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-labelledby="sheetTitle">
+  <div class="sheet-head">
+    <div>
+      <div class="sheet-title" id="sheetTitle"></div>
+      <div class="sheet-sub" id="sheetSub"></div>
+    </div>
+    <button class="sheet-close" id="sheetClose">닫기</button>
+  </div>
+  <div class="sheet-body" id="sheetBody">
+    <div>
+      <div class="field-label">무슨 일이 있었나 <span class="field-hint">— 사실만</span></div>
+      <div id="tagBox"></div>
+    </div>
+    <div>
+      <div class="field-label">선생님이 본 아이 상태 <span class="field-hint">— 해석</span></div>
+      <div class="moods" id="moodBox"></div>
+    </div>
+    <div>
+      <div class="field-label">한 줄 <span class="field-hint">— 생각나면</span></div>
+      <textarea class="note-in" id="noteIn" rows="2" placeholder="비워둬도 됩니다"></textarea>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-ghost" id="delBtn" hidden>삭제</button>
+    <button class="btn" id="saveBtn" disabled>저장</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- constants ---------------- */
+var KEY = "haru3.v1";
+var SCHEMA = 2;
+var MOODS = [
+  {v:-2, em:"😔", lb:"위축", c:"var(--mood-a)"},
+  {v:-1, em:"😕", lb:"시무룩", c:"var(--mood-b)"},
+  {v: 0, em:"😐", lb:"평소", c:"var(--mood-c)"},
+  {v: 1, em:"🙂", lb:"밝음", c:"var(--mood-d)"},
+  {v: 2, em:"😄", lb:"활발", c:"var(--mood-e)"}
+];
+var DEFAULT_SLOTS = ["오전 자유놀이","오전 활동","점심·낮잠","오후 활동"];
+var DEFAULT_TAGS = [
+  {g:"또래", items:["친구와 어울림","다툼·갈등","혼자 놀이","도움을 줌"]},
+  {g:"활동", items:["몰입함","참여 어려움","처음 해냄"]},
+  {g:"정서·몸", items:["울음","크게 웃음","위축·조용함","컨디션 나쁨"]},
+  {g:"기타", items:["선생님을 찾음","규칙 지키기 어려움"]}
+];
+var DEMO_NAMES = ["서준","하윤","도윤","지우","시우","서아","하준","지호","예린","유준","다은","건우"];
+var STALE_DAYS = 4;
+var GAP_SHOWN = 6;
+var BACKUP_NAG_DAYS = 5;
+
+/* ---------------- state ---------------- */
+var S = null;
+var ui = { tab:"record", slot:0, pick:null, editing:null, draft:null };
+var storageBroken = false;
+var lastRenderedDay = null;
+var sheetReturnFocus = null;
+var scrollLockY = 0;
+
+function uid(){ return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-3); }
+function iso(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function today(){ return iso(new Date()); }
+function daysBetween(a,b){
+  return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000);
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ---------------- schema ---------------- */
+function blank(){
+  return {
+    v:SCHEMA,
+    rev:0,
+    demo:false,
+    children:[],
+    slots:DEFAULT_SLOTS.map(function(n){ return {id:uid(), name:n}; }),
+    tags:JSON.parse(JSON.stringify(DEFAULT_TAGS)),
+    entries:[],
+    lastExport:null
+  };
+}
+
+// v1 stored slots as bare strings and put the slot NAME inside each entry id,
+// so renaming a slot orphaned every record under the old name. v2 gives each
+// slot a stable id and keys entries on it.
+function migrate(p){
+  if (!p || !p.children) return null;
+  if (!p.v || p.v < 2){
+    var map = {};
+    p.slots = (p.slots || DEFAULT_SLOTS).map(function(s){
+      if (s && typeof s === "object" && s.id) return s;
+      var o = {id:uid(), name:String(s)};
+      map[o.name] = o.id;
+      return o;
+    });
+    p.entries = (p.entries || []).map(function(e){
+      var slotId = e.slotId || map[e.slot];
+      if (!slotId){
+        // A slot name that no longer exists: keep the record by recreating
+        // the slot rather than dropping it on the floor.
+        var extra = {id:uid(), name:e.slot || "이전 기록"};
+        p.slots.push(extra);
+        map[extra.name] = extra.id;
+        slotId = extra.id;
+      }
+      return {
+        id: e.date + "|" + slotId + "|" + e.childId,
+        date: e.date, slotId: slotId, childId: e.childId,
+        tags: e.tags || [], mood: (e.mood === undefined ? null : e.mood),
+        note: e.note || "", ts: e.ts || new Date().toISOString()
+      };
+    });
+    p.v = SCHEMA;
+  }
+  if (p.rev === undefined) p.rev = 0;
+  if (p.lastExport === undefined) p.lastExport = null;
+  return p;
+}
+
+function demoState(){
+  var s = blank();
+  s.demo = true;
+  s.children = DEMO_NAMES.map(function(n){ return {id:uid(), name:n}; });
+  var pool = [];
+  s.tags.forEach(function(g){ g.items.forEach(function(t){ pool.push(t); }); });
+  var seed = 7;
+  function rnd(){ seed = (seed*1103515245 + 12345) % 2147483648; return seed/2147483648; }
+  // Two children are deliberately left thin so the "놓치고 있는 아이" section
+  // has something true to say the moment the page opens.
+  var quiet = [3,9];
+  for (var back = 6; back >= 0; back--){
+    var d = new Date(); d.setDate(d.getDate()-back);
+    var date = iso(d);
+    for (var k = 0; k < 3; k++){
+      var ci, tries = 0;
+      do { ci = Math.floor(rnd()*s.children.length); tries++; }
+      while (quiet.indexOf(ci) !== -1 && tries < 40);
+      var c = s.children[ci];
+      // Today's records land in the first slot so the opening screen shows
+      // what a filled-in card actually looks like.
+      var slot = back === 0 ? s.slots[0] : s.slots[Math.floor(rnd()*s.slots.length)];
+      var id = date + "|" + slot.id + "|" + c.id;
+      if (s.entries.some(function(e){ return e.id === id; })) continue;
+      var tags = [pool[Math.floor(rnd()*pool.length)]];
+      if (rnd() > .6) tags.push(pool[Math.floor(rnd()*pool.length)]);
+      s.entries.push({
+        id:id, date:date, slotId:slot.id, childId:c.id,
+        tags:tags.filter(function(t,i,a){ return a.indexOf(t)===i; }),
+        mood:[-2,-1,0,0,1,1,2][Math.floor(rnd()*7)],
+        note: rnd() > .78 ? "블록을 오래 붙잡고 있었다." : "",
+        ts:new Date().toISOString()
+      });
+    }
+  }
+  var q = s.children[3];
+  var old = new Date(); old.setDate(old.getDate()-11);
+  s.entries.push({id:iso(old)+"|"+s.slots[1].id+"|"+q.id, date:iso(old), slotId:s.slots[1].id,
+    childId:q.id, tags:["혼자 놀이"], mood:0, note:"", ts:new Date().toISOString()});
+  return s;
+}
+
+/* ---------------- storage ----------------
+   Every write is a read-modify-write against the store, so a tab that has
+   been open since yesterday can no longer wipe what another tab saved in
+   the meantime. Failures are surfaced, never swallowed. */
+function readStore(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    return migrate(JSON.parse(raw));
+  }catch(e){ return null; }
+}
+
+function writeStore(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(S));
+    if (storageBroken){ storageBroken = false; renderAlert(); }
+    return true;
+  }catch(e){
+    storageBroken = true;
+    renderAlert();
+    return false;
+  }
+}
+
+// Apply a change on top of whatever is currently in the store.
+// Returns false when the write failed — callers must not claim success.
+function mutate(fn){
+  var fresh = readStore();
+  if (fresh && (fresh.rev || 0) > (S.rev || 0)){
+    // Another tab moved ahead of us. Adopt its state, then apply our change.
+    S = fresh;
+  }
+  fn(S);
+  S.rev = (S.rev || 0) + 1;
+  return writeStore();
+}
+
+function load(){
+  var p = readStore();
+  if (p) return p;
+  return demoState();
+}
+
+function renderAlert(){
+  var el = document.getElementById("alertBar");
+  if (!storageBroken){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = "<b>저장되지 않고 있습니다.</b> 이 기기의 브라우저가 저장을 막고 있어요. " +
+    "지금까지 입력한 내용은 화면을 닫으면 사라집니다. 데이터 탭에서 먼저 내보내세요.";
+}
+
+/* ---------------- helpers ---------------- */
+function moodOf(v){
+  if (v === null || v === undefined) return null;
+  for (var i=0;i<MOODS.length;i++) if (MOODS[i].v === v) return MOODS[i];
+  return null;
+}
+function slotIndexOf(slotId){
+  for (var i=0;i<S.slots.length;i++) if (S.slots[i].id === slotId) return i;
+  return -1;
+}
+function slotName(slotId){
+  var i = slotIndexOf(slotId);
+  return i === -1 ? "이전 시간대" : S.slots[i].name;
+}
+function entriesOf(childId){
+  return S.entries.filter(function(e){ return e.childId === childId; })
+    .sort(function(a,b){
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      var ai = slotIndexOf(a.slotId), bi = slotIndexOf(b.slotId);
+      if (ai !== bi) return bi - ai;
+      return (b.ts || "") < (a.ts || "") ? -1 : 1;
+    });
+}
+function lastDate(childId){
+  var es = entriesOf(childId);
+  return es.length ? es[0].date : null;
+}
+function sinceDays(childId){
+  var d = lastDate(childId);
+  return d === null ? null : daysBetween(d, today());
+}
+function entryFor(childId, slotId){
+  var id = today() + "|" + slotId + "|" + childId;
+  for (var i=0;i<S.entries.length;i++) if (S.entries[i].id === id) return S.entries[i];
+  return null;
+}
+function orphanEntries(){
+  var known = {};
+  S.children.forEach(function(c){ known[c.id] = 1; });
+  return S.entries.filter(function(e){ return !known[e.childId]; });
+}
+var toastT = null;
+function toast(msg){
+  var el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ el.classList.remove("show"); }, 2400);
+}
+
+/* ---------------- header ---------------- */
+function renderTop(){
+  var d = new Date();
+  var wd = ["일","월","화","수","목","금","토"][d.getDay()];
+  document.getElementById("todayLine").innerHTML =
+    "<b>" + (d.getMonth()+1) + "월 " + d.getDate() + "일</b> " + wd + "요일";
+  var n = 0, uniq = {};
+  S.entries.forEach(function(e){ if (e.date === today()){ n++; uniq[e.childId] = 1; } });
+  document.getElementById("countLine").textContent =
+    "오늘 " + Object.keys(uniq).length + "명 · " + n + "건";
+
+  var bar = document.getElementById("slotBar");
+  bar.hidden = (ui.tab !== "record");
+  bar.innerHTML = "";
+  if (ui.tab !== "record") return;
+  if (ui.slot >= S.slots.length) ui.slot = 0;
+  S.slots.forEach(function(s, i){
+    var b = document.createElement("button");
+    b.className = "slot"; b.textContent = s.name;
+    b.setAttribute("aria-pressed", i === ui.slot ? "true" : "false");
+    b.onclick = function(){ ui.slot = i; render(); };
+    bar.appendChild(b);
+  });
+}
+
+/* ---------------- record tab ---------------- */
+function viewRecord(){
+  var v = document.getElementById("view");
+  v.innerHTML = "";
+
+  if (S.demo){
+    var bn = document.createElement("div");
+    bn.className = "banner";
+    bn.innerHTML = "<span><b>예시 데이터</b>로 보고 있습니다</span>";
+    var b = document.createElement("button");
+    b.textContent = "우리 반으로 바꾸기";
+    b.onclick = function(){ ui.tab = "data"; render(true); };
+    bn.appendChild(b);
+    v.appendChild(bn);
+  } else {
+    var nag = backupNag();
+    if (nag) v.appendChild(nag);
+  }
+
+  if (!S.children.length){
+    var em = document.createElement("div");
+    em.className = "empty";
+    em.innerHTML = "아직 아이가 등록되지 않았습니다.<br>데이터 탭에서 이름을 넣어주세요.";
+    v.appendChild(em);
+    return;
+  }
+
+  // gaps — stable ordering so the same children don't get stuck off the list
+  var stale = S.children.map(function(c){ return {c:c, s:sinceDays(c.id)}; })
+    .filter(function(x){ return x.s === null || x.s >= STALE_DAYS; })
+    .sort(function(a,b){
+      var av = a.s === null ? Infinity : a.s;
+      var bv = b.s === null ? Infinity : b.s;
+      if (av !== bv) return bv - av;
+      return a.c.name < b.c.name ? -1 : a.c.name > b.c.name ? 1 : 0;
+    });
+
+  var g = document.createElement("section");
+  g.className = "gaps";
+  if (stale.length){
+    var shown = stale.slice(0, GAP_SHOWN);
+    var html = '<div class="sec-head"><span class="sec-title">놓치고 있는 아이</span>' +
+      '<span class="sec-note">' + STALE_DAYS + '일 넘게 기록이 없어요</span></div><div class="gap-list">';
+    shown.forEach(function(x){
+      html += '<span class="gap-chip">' + esc(x.c.name) +
+        '<span class="d ' + (x.s === null ? "" : "mono") + '">' +
+        (x.s === null ? "아직 없음" : x.s + "일") + '</span></span>';
+    });
+    if (stale.length > shown.length){
+      html += '<span class="gap-more tnum">외 ' + (stale.length - shown.length) + '명</span>';
+    }
+    g.innerHTML = html + "</div>";
+  } else {
+    g.innerHTML = '<div class="sec-head"><span class="sec-title">놓치고 있는 아이</span></div>' +
+      '<div class="gaps-clear">최근 ' + STALE_DAYS + '일 안에 모든 아이를 한 번씩 봤습니다.</div>';
+  }
+  v.appendChild(g);
+
+  // grid
+  var sec = document.createElement("section");
+  var slot = S.slots[ui.slot] || S.slots[0];
+  sec.innerHTML = '<div class="sec-head"><span class="sec-title">' + esc(slot.name) +
+    '</span><span class="sec-note">눈에 띈 아이만 눌러주세요</span></div>';
+  var grid = document.createElement("div");
+  grid.className = "grid";
+  S.children.forEach(function(c){
+    var e = entryFor(c.id, slot.id);
+    var s = sinceDays(c.id);
+    var card = document.createElement("button");
+    card.className = "card" + (e ? " done" : "");
+    var meta;
+    if (e){
+      var m = moodOf(e.mood);
+      var bits = [];
+      if (m) bits.push(m.lb);
+      if (e.tags.length) bits.push(esc(e.tags[0]) + (e.tags.length > 1 ? " +" + (e.tags.length-1) : ""));
+      // No mood recorded means no colour bar — an unrecorded interpretation
+      // must never look like a recorded one.
+      meta = (m ? '<span class="mini-mood" style="background:' + m.c + '"></span>' : '') +
+        '<span>' + (bits.length ? bits.join(" · ") : "기록함") + '</span>';
+    } else {
+      meta = '<span class="since tnum' + (s === null || s >= STALE_DAYS ? " stale" : "") + '">' +
+        (s === null ? "아직 기록 없음" : s === 0 ? "오늘 기록함" : s + "일 전") + '</span>';
+    }
+    card.innerHTML =
+      '<div class="card-top"><span class="name">' + esc(c.name) + '</span>' +
+      (e ? '<span class="dot" style="background:var(--accent)"></span>' : '') + '</div>' +
+      '<div class="card-meta">' + meta + '</div>';
+    card.onclick = function(){ openSheet(c, slot); };
+    grid.appendChild(card);
+  });
+  sec.appendChild(grid);
+  v.appendChild(sec);
+}
+
+function backupNag(){
+  if (!S.entries.length) return null;
+  var days = S.lastExport === null ? null : daysBetween(S.lastExport, today());
+  if (days !== null && days < BACKUP_NAG_DAYS) return null;
+  var bn = document.createElement("div");
+  bn.className = "banner warn";
+  bn.innerHTML = "<span>" + (days === null
+    ? "아직 <b>한 번도 백업하지 않았습니다.</b>"
+    : "마지막 백업이 <b>" + days + "일 전</b>입니다.") + "</span>";
+  var b = document.createElement("button");
+  b.textContent = "지금 백업";
+  b.onclick = function(){ ui.tab = "data"; render(true); };
+  bn.appendChild(b);
+  return bn;
+}
+
+/* ---------------- sheet ---------------- */
+function openSheet(child, slot){
+  var existing = entryFor(child.id, slot.id);
+  ui.editing = {child:child, slot:slot, existing:existing};
+  ui.draft = existing
+    ? {tags:existing.tags.slice(), mood:(existing.mood === undefined ? null : existing.mood), note:existing.note || ""}
+    : {tags:[], mood:null, note:""};
+
+  document.getElementById("sheetTitle").textContent = child.name;
+  var s = sinceDays(child.id);
+  document.getElementById("sheetSub").textContent =
+    slot.name + " · " + (s === null ? "첫 기록" : s === 0 ? "오늘 기록함" : "마지막 기록 " + s + "일 전");
+
+  var tb = document.getElementById("tagBox");
+  tb.innerHTML = "";
+  var listed = {};
+  S.tags.forEach(function(grp){
+    tb.appendChild(tagGroup(grp.g, grp.items, false));
+    grp.items.forEach(function(t){ listed[t] = 1; });
+  });
+  // Tags saved before the list was edited would otherwise be invisible yet
+  // still stored — show them so they can be seen and removed.
+  var retired = ui.draft.tags.filter(function(t){ return !listed[t]; });
+  if (retired.length) tb.appendChild(tagGroup("이전에 쓰던 항목", retired, true));
+
+  var mb = document.getElementById("moodBox");
+  mb.innerHTML = "";
+  MOODS.forEach(function(m){
+    var b = document.createElement("button");
+    b.className = "mood";
+    b.setAttribute("aria-pressed", ui.draft.mood === m.v ? "true" : "false");
+    b.setAttribute("aria-label", m.lb);
+    b.innerHTML = '<span class="em">' + m.em + '</span><span class="lb">' + m.lb +
+      '</span><span class="bar" style="background:' + m.c + '"></span>';
+    b.onclick = function(){
+      ui.draft.mood = (ui.draft.mood === m.v) ? null : m.v;
+      Array.prototype.forEach.call(mb.children, function(x, i){
+        x.setAttribute("aria-pressed", MOODS[i].v === ui.draft.mood ? "true" : "false");
+      });
+      syncSave();
+    };
+    mb.appendChild(b);
+  });
+
+  var ni = document.getElementById("noteIn");
+  ni.value = ui.draft.note;
+  ni.oninput = function(){ ui.draft.note = ni.value; syncSave(); };
+
+  document.getElementById("delBtn").hidden = !existing;
+  syncSave();
+
+  sheetReturnFocus = document.activeElement;
+  lockScroll();
+  var sheet = document.getElementById("sheet");
+  sheet.setAttribute("aria-modal", "true");
+  document.getElementById("scrim").classList.add("open");
+  sheet.classList.add("open");
+  document.getElementById("sheetBody").scrollTop = 0;
+  setTimeout(function(){ document.getElementById("sheetClose").focus(); }, 60);
+}
+
+function tagGroup(name, items, retired){
+  var wrap = document.createElement("div");
+  wrap.className = "tag-group";
+  wrap.innerHTML = '<div class="tag-group-name">' + esc(name) + '</div>';
+  var row = document.createElement("div");
+  row.className = "tag-row";
+  items.forEach(function(t){
+    var b = document.createElement("button");
+    b.className = "tag" + (retired ? " retired" : "");
+    b.textContent = t;
+    b.setAttribute("aria-pressed", ui.draft.tags.indexOf(t) !== -1 ? "true" : "false");
+    b.onclick = function(){
+      var i = ui.draft.tags.indexOf(t);
+      if (i === -1) ui.draft.tags.push(t); else ui.draft.tags.splice(i,1);
+      b.setAttribute("aria-pressed", i === -1 ? "true" : "false");
+      syncSave();
+    };
+    row.appendChild(b);
+  });
+  wrap.appendChild(row);
+  return wrap;
+}
+
+function syncSave(){
+  var d = ui.draft;
+  var ok = d && (d.mood !== null || d.tags.length > 0 || d.note.trim() !== "");
+  var b = document.getElementById("saveBtn");
+  b.disabled = !ok;
+  b.textContent = !ok ? "하나만 골라주세요"
+    : (ui.editing && ui.editing.existing ? "수정 저장" : "저장");
+}
+
+function lockScroll(){
+  scrollLockY = window.scrollY || 0;
+  document.body.style.top = (-scrollLockY) + "px";
+  document.body.classList.add("locked");
+}
+function unlockScroll(){
+  document.body.classList.remove("locked");
+  document.body.style.top = "";
+  window.scrollTo(0, scrollLockY);
+}
+
+function closeSheet(){
+  var sheet = document.getElementById("sheet");
+  document.getElementById("scrim").classList.remove("open");
+  sheet.classList.remove("open");
+  sheet.removeAttribute("aria-modal");
+  ui.editing = null; ui.draft = null;
+  unlockScroll();
+  if (sheetReturnFocus && sheetReturnFocus.focus){
+    try{ sheetReturnFocus.focus(); }catch(e){}
+  }
+  sheetReturnFocus = null;
+}
+
+function commit(){
+  var e = ui.editing, d = ui.draft;
+  if (!e || !d) return;
+  var childId = e.child.id, slotId = e.slot.id;
+  var id = today() + "|" + slotId + "|" + childId;
+  var rec = {
+    id:id, date:today(), slotId:slotId, childId:childId,
+    tags:d.tags.slice(), mood:d.mood, note:d.note.trim(), ts:new Date().toISOString()
+  };
+  var name = e.child.name;
+  var ok = mutate(function(st){
+    var idx = -1;
+    for (var i=0;i<st.entries.length;i++) if (st.entries[i].id === id) idx = i;
+    if (idx === -1) st.entries.push(rec); else st.entries[idx] = rec;
+    st.demo = false;
+  });
+  closeSheet(); render();
+  // Never claim a save that did not happen.
+  if (ok) toast(name + " 기록됨");
+  else toast("저장되지 않았습니다 — 위 경고를 확인하세요");
+}
+
+function removeEntry(){
+  var e = ui.editing;
+  if (!e || !e.existing) return;
+  if (!confirm(e.child.name + "의 이 기록을 지웁니다. 되돌릴 수 없습니다.")) return;
+  var id = e.existing.id;
+  var ok = mutate(function(st){
+    st.entries = st.entries.filter(function(x){ return x.id !== id; });
+  });
+  closeSheet(); render();
+  toast(ok ? "삭제했습니다" : "저장되지 않았습니다 — 위 경고를 확인하세요");
+}
+
+/* ---------------- child tab ---------------- */
+function viewChild(){
+  var v = document.getElementById("view");
+  v.innerHTML = "";
+  if (!S.children.length){
+    var em0 = document.createElement("div");
+    em0.className = "empty";
+    em0.textContent = "아이를 먼저 등록해주세요.";
+    v.appendChild(em0);
+    return;
+  }
+  if (!ui.pick || !S.children.some(function(c){ return c.id === ui.pick; })) ui.pick = S.children[0].id;
+
+  var pk = document.createElement("div");
+  pk.className = "picker";
+  var selected = null;
+  S.children.forEach(function(c){
+    var b = document.createElement("button");
+    b.className = "pick"; b.textContent = c.name;
+    b.setAttribute("aria-pressed", c.id === ui.pick ? "true" : "false");
+    if (c.id === ui.pick) selected = b;
+    b.onclick = function(){ ui.pick = c.id; render(); };
+    pk.appendChild(b);
+  });
+  v.appendChild(pk);
+
+  var child = S.children.filter(function(c){ return c.id === ui.pick; })[0];
+  var es = entriesOf(child.id);
+
+  // The picker scrolls back to 0 on every render, so name the child in the page.
+  var h = document.createElement("div");
+  h.className = "child-name";
+  h.textContent = child.name;
+  v.appendChild(h);
+  if (selected && selected.scrollIntoView){
+    setTimeout(function(){
+      try{ selected.scrollIntoView({block:"nearest", inline:"center"}); }catch(e2){}
+    }, 0);
+  }
+
+  var stat = document.createElement("div");
+  stat.className = "stat-row";
+  var s = sinceDays(child.id);
+  stat.innerHTML =
+    '<div class="stat"><div class="v mono">' + es.length + '</div><div class="k">기록 수</div></div>' +
+    '<div class="stat"><div class="v tnum">' + (s === null ? "—" : s === 0 ? "오늘" : s + "일 전") +
+      '</div><div class="k">마지막 기록</div></div>';
+  v.appendChild(stat);
+
+  if (!es.length){
+    var em = document.createElement("div");
+    em.className = "empty";
+    em.innerHTML = esc(child.name) + " 기록이 아직 없습니다.<br>기록 탭에서 눌러 남겨보세요.";
+    v.appendChild(em);
+    return;
+  }
+
+  // mood distribution — ordinal, one bar per step, labelled directly
+  var counts = MOODS.map(function(m){
+    return es.filter(function(e){ return e.mood === m.v; }).length;
+  });
+  var moodTotal = counts.reduce(function(a,b){ return a+b; }, 0);
+  var max = Math.max.apply(null, counts) || 1;
+  var ds = document.createElement("section");
+  var dh = '<div class="sec-head"><span class="sec-title">상태 분포</span>' +
+    '<span class="sec-note">상태를 남긴 기록 ' + moodTotal + '건' +
+    (moodTotal < es.length ? ' · 나머지 ' + (es.length - moodTotal) + '건은 상태 없음' : '') +
+    '</span></div><div class="dist">';
+  MOODS.forEach(function(m, i){
+    var hgt = Math.round(counts[i] / max * 46) + 3;
+    dh += '<div class="dist-col">' +
+      '<span class="dist-n mono">' + (counts[i] || "") + '</span>' +
+      '<span class="dist-bar" style="height:' + hgt + 'px;background:' + m.c + '"></span>' +
+      '<span class="dist-lb">' + m.em + '</span></div>';
+  });
+  dh += '</div><div class="dist-cap">';
+  MOODS.forEach(function(m){ dh += '<span>' + m.lb + '</span>'; });
+  ds.innerHTML = dh + "</div>";
+  v.appendChild(ds);
+
+  // tag frequency
+  var tally = {};
+  es.forEach(function(e){ e.tags.forEach(function(t){ tally[t] = (tally[t]||0)+1; }); });
+  var keys = Object.keys(tally).sort(function(a,b){ return tally[b]-tally[a]; }).slice(0,6);
+  if (keys.length){
+    var fs = document.createElement("section");
+    var fmax = tally[keys[0]];
+    var fh = '<div class="sec-head"><span class="sec-title">자주 붙은 관찰</span></div><div class="freq">';
+    keys.forEach(function(k){
+      fh += '<div class="freq-row"><span class="freq-label">' + esc(k) + '</span>' +
+        '<span class="freq-n mono">' + tally[k] + '</span>' +
+        '<span class="freq-track"><span class="freq-fill" style="width:' +
+        Math.round(tally[k]/fmax*100) + '%"></span></span></div>';
+    });
+    fs.innerHTML = fh + "</div>";
+    v.appendChild(fs);
+  }
+
+  // log
+  var ls = document.createElement("section");
+  var lh = '<div class="sec-head"><span class="sec-title">기록</span></div><div class="log">';
+  es.slice(0,25).forEach(function(e){
+    var m = moodOf(e.mood);
+    var dt = e.date.slice(5).replace("-",".");
+    lh += '<div class="log-item"><div class="log-when"><b class="mono">' + dt + '</b>' +
+      esc(slotName(e.slotId)) + '</div><div class="log-body">';
+    if (m) lh += '<span class="log-mood"><span class="mini-mood" style="background:' + m.c + '"></span>' + m.lb + '</span>';
+    if (e.tags.length){
+      lh += '<span class="log-tags">';
+      e.tags.forEach(function(t){ lh += '<span class="log-tag">' + esc(t) + '</span>'; });
+      lh += '</span>';
+    }
+    if (e.note) lh += '<span class="log-note">' + esc(e.note) + '</span>';
+    lh += '</div></div>';
+  });
+  ls.innerHTML = lh + "</div>";
+  v.appendChild(ls);
+}
+
+/* ---------------- export / import ---------------- */
+function csvCell(x){
+  x = String(x === null || x === undefined ? "" : x);
+  // A leading =, +, - or @ makes a spreadsheet treat the note as a formula.
+  if (/^[=+\-@]/.test(x)) x = "'" + x;
+  return /[",\r\n]/.test(x) ? '"' + x.replace(/"/g,'""') + '"' : x;
+}
+function toCSV(){
+  var names = {};
+  S.children.forEach(function(c){ names[c.id] = c.name; });
+  var rows = [["date","slot","child","child_id","tags","mood","mood_label","note"].join(",")];
+  S.entries.slice().sort(function(a,b){
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return slotIndexOf(a.slotId) - slotIndexOf(b.slotId);
+  }).forEach(function(e){
+    var m = moodOf(e.mood);
+    rows.push([
+      csvCell(e.date), csvCell(slotName(e.slotId)),
+      csvCell(names[e.childId] || "(명단에 없음)"), csvCell(e.childId),
+      csvCell(e.tags.join("; ")),
+      csvCell(e.mood === null || e.mood === undefined ? "" : e.mood),
+      csvCell(m ? m.lb : ""), csvCell(e.note)
+    ].join(","));
+  });
+  return rows.join("\r\n");
+}
+function markExported(){
+  mutate(function(st){ st.lastExport = today(); });
+}
+function copyText(text, label){
+  var out = document.getElementById("outBox");
+  if (out) out.value = text;
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      markExported(); render(); toast(label + " 복사됨 — 카톡에 붙여넣어 두세요");
+    }, function(){ toast("아래 칸에서 직접 복사하세요"); });
+  } else {
+    toast("아래 칸에서 직접 복사하세요");
+  }
+}
+// iOS share sheet: two taps to hand the backup to KakaoTalk.
+function shareCSV(){
+  var csv = "﻿" + toCSV();
+  var name = "하루세아이-" + today() + ".csv";
+  var done = function(){ markExported(); render(); };
+  try{
+    var file = new File([csv], name, {type:"text/csv"});
+    if (navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:name}).then(done, function(){});
+      return;
+    }
+  }catch(e){}
+  if (navigator.share){
+    navigator.share({title:name, text:toCSV()}).then(done, function(){});
+    return;
+  }
+  copyText(toCSV(), "CSV");
+}
+
+/* ---------------- data tab ---------------- */
+function viewData(){
+  var v = document.getElementById("view");
+  v.innerHTML = "";
+
+  var dates = S.entries.map(function(e){ return e.date; }).sort();
+  var days = S.lastExport === null ? null : daysBetween(S.lastExport, today());
+
+  var p1 = document.createElement("section");
+  p1.className = "panel";
+  p1.innerHTML =
+    "<h3>백업</h3>" +
+    "<p>기록 <b>" + S.entries.length + "건</b>" +
+    (dates.length ? " · " + dates[0] + " ~ " + dates[dates.length-1] : "") +
+    "<br>마지막 백업: <b>" + (days === null ? "없음" : days === 0 ? "오늘" : days + "일 전") + "</b>" +
+    "<br>기록은 이 브라우저에만 있습니다. 며칠에 한 번은 카톡으로 보내두세요.</p>";
+  var r1 = document.createElement("div"); r1.className = "row-btns";
+  if (navigator.share){
+    var bs = document.createElement("button");
+    bs.className = "btn-sm primary"; bs.textContent = "카톡 등으로 보내기";
+    bs.onclick = shareCSV;
+    r1.appendChild(bs);
+  }
+  var b1 = document.createElement("button");
+  b1.className = "btn-sm" + (navigator.share ? "" : " primary"); b1.textContent = "CSV 복사";
+  b1.onclick = function(){ copyText(toCSV(), "CSV"); };
+  var b2 = document.createElement("button");
+  b2.className = "btn-sm"; b2.textContent = "JSON 복사";
+  b2.onclick = function(){ copyText(JSON.stringify(S), "JSON"); };
+  r1.appendChild(b1); r1.appendChild(b2);
+  p1.appendChild(r1);
+  var out = document.createElement("textarea");
+  out.className = "out"; out.id = "outBox";
+  out.placeholder = "복사 버튼을 누르면 여기에도 내용이 나옵니다.";
+  out.onclick = function(){ out.select(); };
+  p1.appendChild(out);
+  v.appendChild(p1);
+
+  // restore
+  var p0 = document.createElement("section");
+  p0.className = "panel";
+  p0.innerHTML = "<h3>복원</h3><p>백업해 둔 <b>JSON</b>을 붙여넣으면 그 시점으로 되돌립니다. " +
+    "지금 기록은 모두 대체됩니다.</p>";
+  var imp = document.createElement("textarea");
+  imp.className = "out"; imp.placeholder = '{"v":2,"children":[...';
+  p0.appendChild(imp);
+  var r0 = document.createElement("div"); r0.className = "row-btns";
+  var b0 = document.createElement("button");
+  b0.className = "btn-sm"; b0.textContent = "이 내용으로 복원";
+  b0.onclick = function(){
+    var txt = imp.value.trim();
+    if (!txt){ toast("복원할 JSON을 붙여넣어 주세요"); return; }
+    var parsed;
+    try{ parsed = migrate(JSON.parse(txt)); }
+    catch(e){ toast("JSON을 읽을 수 없습니다. 복사한 내용을 다시 붙여넣어 주세요"); return; }
+    if (!parsed || !parsed.children){ toast("이 앱의 백업 형식이 아닙니다"); return; }
+    if (!confirm("아이 " + parsed.children.length + "명, 기록 " + (parsed.entries||[]).length +
+      "건으로 되돌립니다.\n지금 기록 " + S.entries.length + "건은 사라집니다. 계속할까요?")) return;
+    parsed.rev = (S.rev || 0) + 1;
+    S = parsed;
+    var ok = writeStore();
+    ui.tab = "record"; ui.slot = 0; ui.pick = null;
+    render(true);
+    toast(ok ? "복원했습니다" : "복원했지만 저장되지 않았습니다");
+  };
+  r0.appendChild(b0);
+  p0.appendChild(r0);
+  v.appendChild(p0);
+
+  v.appendChild(rowEditor({
+    title:"우리 반 아이들",
+    desc:"이름을 고쳐도 그 아이의 기록은 그대로 따라갑니다. 지우면 그 아이의 기록도 함께 사라집니다.",
+    list:S.children,
+    addLabel:"+ 아이 추가",
+    placeholder:"이름",
+    countOf:function(c){ return S.entries.filter(function(e){ return e.childId === c.id; }).length; },
+    onDelete:function(c, n){
+      return confirm(c.name + " 을(를) 명단에서 지웁니다." +
+        (n ? "\n이 아이의 기록 " + n + "건도 함께 사라집니다." : "") + "\n계속할까요?");
+    },
+    remove:function(st, id){
+      st.children = st.children.filter(function(x){ return x.id !== id; });
+      st.entries = st.entries.filter(function(e){ return e.childId !== id; });
+    },
+    add:function(st, name){ st.children.push({id:uid(), name:name}); },
+    rename:function(st, id, name){
+      st.children.forEach(function(c){ if (c.id === id) c.name = name; });
+    }
+  }));
+
+  // orphan cleanup — covers the demo records that survive a first save
+  var orphans = orphanEntries();
+  if (orphans.length){
+    var po = document.createElement("section");
+    po.className = "panel";
+    po.innerHTML = "<h3>명단에 없는 기록</h3><p>지금 명단에 없는 아이의 기록이 <b>" +
+      orphans.length + "건</b> 남아 있습니다. 예시 데이터를 눌러본 뒤 명단을 바꿨다면 이것입니다. " +
+      "그대로 두면 CSV에도 함께 나갑니다.</p>";
+    var ro = document.createElement("div"); ro.className = "row-btns";
+    var bo = document.createElement("button");
+    bo.className = "btn-sm danger"; bo.textContent = orphans.length + "건 지우기";
+    bo.onclick = function(){
+      if (!confirm("명단에 없는 기록 " + orphans.length + "건을 지웁니다. 되돌릴 수 없습니다.")) return;
+      var ok = mutate(function(st){
+        var known = {};
+        st.children.forEach(function(c){ known[c.id] = 1; });
+        st.entries = st.entries.filter(function(e){ return known[e.childId]; });
+      });
+      render(); toast(ok ? "정리했습니다" : "저장되지 않았습니다");
+    };
+    ro.appendChild(bo);
+    po.appendChild(ro);
+    v.appendChild(po);
+  }
+
+  v.appendChild(rowEditor({
+    title:"기록하는 시간대",
+    desc:"쉬는 시간에 있었던 일을 바로 다음 수업 시간에 남기는 리듬입니다. 이름을 고쳐도 기존 기록은 그대로 붙어 있습니다.",
+    list:S.slots,
+    addLabel:"+ 시간대 추가",
+    placeholder:"시간대 이름",
+    countOf:function(s){ return S.entries.filter(function(e){ return e.slotId === s.id; }).length; },
+    onDelete:function(s, n){
+      return confirm(s.name + " 시간대를 지웁니다." +
+        (n ? "\n이 시간대의 기록 " + n + "건도 함께 사라집니다." : "") + "\n계속할까요?");
+    },
+    remove:function(st, id){
+      st.slots = st.slots.filter(function(x){ return x.id !== id; });
+      st.entries = st.entries.filter(function(e){ return e.slotId !== id; });
+    },
+    add:function(st, name){ st.slots.push({id:uid(), name:name}); },
+    rename:function(st, id, name){
+      st.slots.forEach(function(s){ if (s.id === id) s.name = name; });
+    },
+    minOne:true
+  }));
+
+  // tags editor
+  var p4 = document.createElement("section");
+  p4.className = "panel";
+  p4.innerHTML = "<h3>관찰 항목</h3><p><b>#</b>로 시작하면 묶음 이름, 나머지는 항목입니다. " +
+    "실제로 반복해서 벌어지는 일로 바꿔주세요. 이미 남긴 기록의 항목은 그대로 유지됩니다.</p>";
+  var tg = document.createElement("textarea");
+  tg.className = "edit-area"; tg.style.minHeight = "200px";
+  tg.value = S.tags.map(function(g){
+    return "# " + g.g + "\n" + g.items.join("\n");
+  }).join("\n\n");
+  p4.appendChild(tg);
+  var r4 = document.createElement("div"); r4.className = "row-btns";
+  var sb4 = document.createElement("button");
+  sb4.className = "btn-sm primary"; sb4.textContent = "항목 저장";
+  sb4.onclick = function(){
+    var groups = [], cur = null;
+    tg.value.split("\n").forEach(function(line){
+      var t = line.trim();
+      if (!t) return;
+      if (t.charAt(0) === "#"){ cur = {g:t.replace(/^#+\s*/,""), items:[]}; groups.push(cur); }
+      else { if (!cur){ cur = {g:"관찰", items:[]}; groups.push(cur); } cur.items.push(t); }
+    });
+    groups = groups.filter(function(g){ return g.items.length; });
+    if (!groups.length){ toast("항목을 하나 이상 넣어주세요"); return; }
+    var ok = mutate(function(st){ st.tags = groups; });
+    render(); toast(ok ? "관찰 항목을 저장했습니다" : "저장되지 않았습니다");
+  };
+  r4.appendChild(sb4);
+  p4.appendChild(r4);
+  v.appendChild(p4);
+
+  // reset
+  var p5 = document.createElement("section");
+  p5.className = "panel";
+  p5.innerHTML = "<h3>초기화</h3><p>지우기 전에 반드시 위에서 백업하세요. 되돌릴 수 없습니다.</p>";
+  var r5 = document.createElement("div"); r5.className = "row-btns";
+  var d1 = document.createElement("button");
+  d1.className = "btn-sm"; d1.textContent = "예시 데이터 다시 넣기";
+  d1.onclick = function(){
+    if (!confirm("지금 기록을 모두 버리고 예시 데이터로 되돌립니다. 계속할까요?")) return;
+    var fresh = demoState();
+    fresh.rev = (S.rev || 0) + 1;
+    S = fresh;
+    var ok = writeStore();
+    ui.tab = "record"; ui.slot = 0; ui.pick = null;
+    render(true); toast(ok ? "예시 데이터로 되돌렸습니다" : "저장되지 않았습니다");
+  };
+  var d2 = document.createElement("button");
+  d2.className = "btn-sm danger"; d2.textContent = "기록 전체 삭제";
+  d2.onclick = function(){
+    if (!confirm("기록을 모두 지웁니다. 명단은 남습니다. 계속할까요?")) return;
+    var ok = mutate(function(st){ st.entries = []; st.demo = false; });
+    render(); toast(ok ? "기록을 모두 지웠습니다" : "저장되지 않았습니다");
+  };
+  r5.appendChild(d1); r5.appendChild(d2);
+  p5.appendChild(r5);
+  v.appendChild(p5);
+}
+
+// Row-at-a-time editor: renaming keeps the row's id, so records never lose
+// the thing they point at. A textarea of names could not do that.
+function rowEditor(cfg){
+  var p = document.createElement("section");
+  p.className = "panel";
+  p.innerHTML = "<h3>" + esc(cfg.title) + "</h3><p>" + cfg.desc + "</p>";
+  var rows = document.createElement("div");
+  rows.className = "rows";
+  cfg.list.forEach(function(item){
+    var row = document.createElement("div");
+    row.className = "row-edit";
+    var inp = document.createElement("input");
+    inp.className = "row-in"; inp.type = "text";
+    inp.value = item.name; inp.placeholder = cfg.placeholder;
+    inp.setAttribute("aria-label", cfg.placeholder);
+    inp.onchange = function(){
+      var name = inp.value.trim();
+      if (!name){ inp.value = item.name; toast("이름을 비울 수 없습니다"); return; }
+      var ok = mutate(function(st){ cfg.rename(st, item.id, name); });
+      if (!ok) toast("저장되지 않았습니다");
+      renderTop();
+    };
+    var del = document.createElement("button");
+    del.className = "row-del"; del.textContent = "×";
+    del.setAttribute("aria-label", item.name + " 지우기");
+    del.onclick = function(){
+      if (cfg.minOne && cfg.list.length <= 1){ toast("하나는 남겨야 합니다"); return; }
+      var n = cfg.countOf(item);
+      if (!cfg.onDelete(item, n)) return;
+      var ok = mutate(function(st){ cfg.remove(st, item.id); });
+      render(); toast(ok ? "지웠습니다" : "저장되지 않았습니다");
+    };
+    row.appendChild(inp); row.appendChild(del);
+    rows.appendChild(row);
+  });
+  p.appendChild(rows);
+  var add = document.createElement("button");
+  add.className = "row-add"; add.textContent = cfg.addLabel;
+  add.onclick = function(){
+    var name = prompt(cfg.placeholder + "을(를) 입력하세요");
+    if (name === null) return;
+    name = name.trim();
+    if (!name) return;
+    var ok = mutate(function(st){ cfg.add(st, name); });
+    render(); toast(ok ? "추가했습니다" : "저장되지 않았습니다");
+  };
+  p.appendChild(add);
+  return p;
+}
+
+/* ---------------- routing ---------------- */
+function render(resetScroll){
+  lastRenderedDay = today();
+  renderAlert();
+  renderTop();
+  if (ui.tab === "record") viewRecord();
+  else if (ui.tab === "child") viewChild();
+  else viewData();
+  Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function(b){
+    if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page");
+    else b.removeAttribute("aria-current");
+  });
+  // Only jump to the top when the tab changes — saving a record in the lower
+  // half of the list must not throw the list back to the start.
+  if (resetScroll) window.scrollTo(0,0);
+}
+
+Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function(b){
+  b.onclick = function(){
+    if (ui.tab === b.dataset.tab) return;
+    ui.tab = b.dataset.tab;
+    render(true);
+  };
+});
+document.getElementById("scrim").onclick = closeSheet;
+document.getElementById("sheetClose").onclick = closeSheet;
+document.getElementById("saveBtn").onclick = commit;
+document.getElementById("delBtn").onclick = removeEntry;
+
+document.addEventListener("keydown", function(e){
+  var sheet = document.getElementById("sheet");
+  if (!sheet.classList.contains("open")) return;
+  if (e.key === "Escape"){ closeSheet(); return; }
+  if (e.key !== "Tab") return;
+  // Keep Tab inside the open sheet.
+  var f = sheet.querySelectorAll("button, textarea, input, [tabindex]");
+  var list = Array.prototype.filter.call(f, function(el){ return !el.disabled && el.offsetParent !== null; });
+  if (!list.length) return;
+  var first = list[0], last = list[list.length-1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
+
+// Another tab wrote: adopt it rather than letting this tab overwrite it later.
+window.addEventListener("storage", function(e){
+  if (e.key !== KEY) return;
+  var fresh = readStore();
+  if (fresh && (fresh.rev || 0) > (S.rev || 0)){
+    S = fresh;
+    if (!document.getElementById("sheet").classList.contains("open")) render();
+  }
+});
+
+// The date can roll over while the app sits open on a home-screen icon.
+function checkDay(){
+  if (lastRenderedDay && today() !== lastRenderedDay) render();
+}
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkDay(); });
+window.addEventListener("pageshow", checkDay);
+setInterval(checkDay, 60000);
+
+// Offline shell. Present only in the self-hosted build; the registration
+// simply fails and is ignored anywhere sw.js is not served.
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+
+S = load();
+render(true);
+})();
+</script>
