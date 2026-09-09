@@ -9,9 +9,9 @@
   --surface-2:#F3F5F3;
   --ink:#1A2522;
   --ink-2:#4E5A56;
-  --ink-3:#6E7A76;
+  --ink-3:#66726E;
   --line:#DDE2DF;
-  --line-2:#B4BEBA;
+  --line-2:#869390;
   --accent:#2F6B5C;
   --accent-ink:#FFFFFF;
   --accent-soft:#E6F0EC;
@@ -36,7 +36,7 @@
     --ink-2:#AEBAB6;
     --ink-3:#8A9591;
     --line:#333F3B;
-    --line-2:#4C5A55;
+    --line-2:#68776F;
     --accent:#5FA894;
     --accent-ink:#0E1614;
     --accent-soft:#1E2E2A;
@@ -61,7 +61,7 @@
   --ink-2:#AEBAB6;
   --ink-3:#8A9591;
   --line:#333F3B;
-  --line-2:#4C5A55;
+  --line-2:#68776F;
   --accent:#5FA894;
   --accent-ink:#0E1614;
   --accent-soft:#1E2E2A;
@@ -399,8 +399,11 @@ var BACKUP_NAG_DAYS = 5;
 
 /* ---------------- state ---------------- */
 var S = null;
-var ui = { tab:"record", slot:0, pick:null, editing:null, draft:null };
+// slotId, not an index — deleting a slot must not silently move the
+// selection onto a different one.
+var ui = { tab:"record", slotId:null, pick:null, editing:null, draft:null };
 var storageBroken = false;
+var storageCorrupt = false;
 var lastRenderedDay = null;
 var sheetReturnFocus = null;
 var scrollLockY = 0;
@@ -431,12 +434,66 @@ function blank(){
   };
 }
 
+// Every field is forced into the shape the app renders. A backup that is
+// merely plausible ("children" and nothing else) must not be able to take
+// the app down — the restore box accepts whatever a person pastes.
+function normalize(p){
+  if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+
+  if (!Array.isArray(p.children)) p.children = [];
+  p.children = p.children
+    .filter(function(c){ return c && typeof c === "object" && c.id; })
+    .map(function(c){ return {id:String(c.id), name:String(c.name === undefined ? "이름 없음" : c.name)}; });
+
+  if (!Array.isArray(p.slots)) p.slots = [];
+  p.slots = p.slots.map(function(s){
+    if (s && typeof s === "object" && s.id) return {id:String(s.id), name:String(s.name === undefined ? "시간대" : s.name)};
+    return {id:uid(), name:String(s)};
+  });
+  if (!p.slots.length) p.slots = DEFAULT_SLOTS.map(function(n){ return {id:uid(), name:n}; });
+
+  if (!Array.isArray(p.tags)) p.tags = [];
+  p.tags = p.tags
+    .filter(function(g){ return g && typeof g === "object" && Array.isArray(g.items) && g.items.length; })
+    .map(function(g){
+      return {g:String(g.g === undefined ? "관찰" : g.g), items:g.items.map(String)};
+    });
+  if (!p.tags.length) p.tags = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+
+  if (!Array.isArray(p.entries)) p.entries = [];
+  var slotIds = {};
+  p.slots.forEach(function(s){ slotIds[s.id] = 1; });
+  p.entries = p.entries
+    .filter(function(e){ return e && typeof e === "object" && e.date && e.childId && e.slotId; })
+    .map(function(e){
+      if (!slotIds[e.slotId]){
+        var revived = {id:uid(), name:"이전 시간대"};
+        p.slots.push(revived); slotIds[revived.id] = 1;
+        e.slotId = revived.id;
+      }
+      return {
+        id: String(e.id || (e.date + "|" + e.slotId + "|" + e.childId)),
+        date: String(e.date), slotId: String(e.slotId), childId: String(e.childId),
+        tags: Array.isArray(e.tags) ? e.tags.map(String) : [],
+        mood: (typeof e.mood === "number") ? e.mood : null,
+        note: typeof e.note === "string" ? e.note : "",
+        ts: String(e.ts || new Date().toISOString())
+      };
+    });
+
+  p.v = SCHEMA;
+  if (typeof p.rev !== "number") p.rev = 0;
+  if (typeof p.lastExport !== "string") p.lastExport = null;
+  p.demo = !!p.demo;
+  return p;
+}
+
 // v1 stored slots as bare strings and put the slot NAME inside each entry id,
 // so renaming a slot orphaned every record under the old name. v2 gives each
 // slot a stable id and keys entries on it.
 function migrate(p){
-  if (!p || !p.children) return null;
-  if (!p.v || p.v < 2){
+  if (!p || typeof p !== "object" || !Array.isArray(p.children)) return null;
+  if ((!p.v || p.v < 2) && Array.isArray(p.slots)){
     var map = {};
     p.slots = (p.slots || DEFAULT_SLOTS).map(function(s){
       if (s && typeof s === "object" && s.id) return s;
@@ -463,9 +520,7 @@ function migrate(p){
     });
     p.v = SCHEMA;
   }
-  if (p.rev === undefined) p.rev = 0;
-  if (p.lastExport === undefined) p.lastExport = null;
-  return p;
+  return normalize(p);
 }
 
 function demoState(){
@@ -515,11 +570,25 @@ function demoState(){
    been open since yesterday can no longer wipe what another tab saved in
    the meantime. Failures are surfaced, never swallowed. */
 function readStore(){
+  var raw = null;
+  try{ raw = localStorage.getItem(KEY); }
+  catch(e){ return null; }
+  if (!raw) return null;
   try{
-    var raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    return migrate(JSON.parse(raw));
-  }catch(e){ return null; }
+    var p = migrate(JSON.parse(raw));
+    if (!p) throw new Error("shape");
+    return p;
+  }catch(e){
+    // "읽지 못했다"와 "비어 있다"는 다르다. 예시 데이터로 조용히 갈아타면
+    // 교사는 초기화된 줄 알고, 첫 저장에서 원본이 덮여 사라진다.
+    if (!storageCorrupt){
+      storageCorrupt = true;
+      try{
+        if (!localStorage.getItem(KEY + ".broken")) localStorage.setItem(KEY + ".broken", raw);
+      }catch(e2){}
+    }
+    return null;
+  }
 }
 
 function writeStore(){
@@ -555,10 +624,19 @@ function load(){
 
 function renderAlert(){
   var el = document.getElementById("alertBar");
-  if (!storageBroken){ el.hidden = true; return; }
-  el.hidden = false;
-  el.innerHTML = "<b>저장되지 않고 있습니다.</b> 이 기기의 브라우저가 저장을 막고 있어요. " +
-    "지금까지 입력한 내용은 화면을 닫으면 사라집니다. 데이터 탭에서 먼저 내보내세요.";
+  if (storageBroken){
+    el.hidden = false;
+    el.innerHTML = "<b>저장되지 않고 있습니다.</b> 이 기기의 브라우저가 저장을 막고 있어요. " +
+      "지금까지 입력한 내용은 화면을 닫으면 사라집니다. 데이터 탭에서 먼저 내보내세요.";
+    return;
+  }
+  if (storageCorrupt){
+    el.hidden = false;
+    el.innerHTML = "<b>저장된 기록을 읽지 못했습니다.</b> 지금 보이는 것은 이전 기록이 아닙니다. " +
+      "원본은 지우지 않고 따로 보관해 두었으니, 기록하기 전에 먼저 알려주세요.";
+    return;
+  }
+  el.hidden = true;
 }
 
 /* ---------------- helpers ---------------- */
@@ -566,6 +644,18 @@ function moodOf(v){
   if (v === null || v === undefined) return null;
   for (var i=0;i<MOODS.length;i++) if (MOODS[i].v === v) return MOODS[i];
   return null;
+}
+function currentSlot(){
+  if (!S.slots.length) return null;
+  for (var i=0;i<S.slots.length;i++) if (S.slots[i].id === ui.slotId) return S.slots[i];
+  ui.slotId = S.slots[0].id;
+  return S.slots[0];
+}
+// A whole-state swap (restore, reset) must still outrank whatever is in the
+// store, or another tab quietly reverts it.
+function bumpRev(st, prevRev){
+  var cur = readStore();
+  st.rev = Math.max((cur && cur.rev) || 0, prevRev || 0, st.rev || 0) + 1;
 }
 function slotIndexOf(slotId){
   for (var i=0;i<S.slots.length;i++) if (S.slots[i].id === slotId) return i;
@@ -625,12 +715,12 @@ function renderTop(){
   bar.hidden = (ui.tab !== "record");
   bar.innerHTML = "";
   if (ui.tab !== "record") return;
-  if (ui.slot >= S.slots.length) ui.slot = 0;
-  S.slots.forEach(function(s, i){
+  var cur = currentSlot();
+  S.slots.forEach(function(s){
     var b = document.createElement("button");
     b.className = "slot"; b.textContent = s.name;
-    b.setAttribute("aria-pressed", i === ui.slot ? "true" : "false");
-    b.onclick = function(){ ui.slot = i; render(); };
+    b.setAttribute("aria-pressed", cur && s.id === cur.id ? "true" : "false");
+    b.onclick = function(){ ui.slotId = s.id; render(); };
     bar.appendChild(b);
   });
 }
@@ -695,7 +785,8 @@ function viewRecord(){
 
   // grid
   var sec = document.createElement("section");
-  var slot = S.slots[ui.slot] || S.slots[0];
+  var slot = currentSlot();
+  if (!slot) return;
   sec.innerHTML = '<div class="sec-head"><span class="sec-title">' + esc(slot.name) +
     '</span><span class="sec-note">눈에 띈 아이만 눌러주세요</span></div>';
   var grid = document.createElement("div");
@@ -749,7 +840,9 @@ function backupNag(){
 /* ---------------- sheet ---------------- */
 function openSheet(child, slot){
   var existing = entryFor(child.id, slot.id);
-  ui.editing = {child:child, slot:slot, existing:existing};
+  // Pin the date at open time: if midnight passes while the sheet is up,
+  // an edit must stay an edit rather than becoming a new record.
+  ui.editing = {child:child, slot:slot, existing:existing, date:today()};
   ui.draft = existing
     ? {tags:existing.tags.slice(), mood:(existing.mood === undefined ? null : existing.mood), note:existing.note || ""}
     : {tags:[], mood:null, note:""};
@@ -866,10 +959,10 @@ function closeSheet(){
 function commit(){
   var e = ui.editing, d = ui.draft;
   if (!e || !d) return;
-  var childId = e.child.id, slotId = e.slot.id;
-  var id = today() + "|" + slotId + "|" + childId;
+  var childId = e.child.id, slotId = e.slot.id, day = e.date || today();
+  var id = day + "|" + slotId + "|" + childId;
   var rec = {
-    id:id, date:today(), slotId:slotId, childId:childId,
+    id:id, date:day, slotId:slotId, childId:childId,
     tags:d.tags.slice(), mood:d.mood, note:d.note.trim(), ts:new Date().toISOString()
   };
   var name = e.child.name;
@@ -1020,7 +1113,9 @@ function viewChild(){
 function csvCell(x){
   x = String(x === null || x === undefined ? "" : x);
   // A leading =, +, - or @ makes a spreadsheet treat the note as a formula.
-  if (/^[=+\-@]/.test(x)) x = "'" + x;
+  // Plain numbers are exempt, or the mood column turns -1 and -2 into text
+  // and every average silently drops the withdrawn end of the scale.
+  if (/^[=+\-@]/.test(x) && !/^-?\d+(\.\d+)?$/.test(x)) x = "'" + x;
   return /[",\r\n]/.test(x) ? '"' + x.replace(/"/g,'""') + '"' : x;
 }
 function toCSV(){
@@ -1111,6 +1206,15 @@ function viewData(){
   out.placeholder = "복사 버튼을 누르면 여기에도 내용이 나옵니다.";
   out.onclick = function(){ out.select(); };
   p1.appendChild(out);
+  // Copying to the clipboard is not the same as having backed up, and a
+  // clipboard write that fails would otherwise leave the nag on forever.
+  var mr = document.createElement("div"); mr.className = "row-btns";
+  var manual = document.createElement("button");
+  manual.className = "btn-sm";
+  manual.textContent = "직접 복사했어요 — 백업 완료로 표시";
+  manual.onclick = function(){ markExported(); render(); toast("백업 완료로 표시했습니다"); };
+  mr.appendChild(manual);
+  p1.appendChild(mr);
   v.appendChild(p1);
 
   // restore
@@ -1130,14 +1234,23 @@ function viewData(){
     var parsed;
     try{ parsed = migrate(JSON.parse(txt)); }
     catch(e){ toast("JSON을 읽을 수 없습니다. 복사한 내용을 다시 붙여넣어 주세요"); return; }
-    if (!parsed || !parsed.children){ toast("이 앱의 백업 형식이 아닙니다"); return; }
-    if (!confirm("아이 " + parsed.children.length + "명, 기록 " + (parsed.entries||[]).length +
+    if (!parsed){ toast("이 앱의 백업 형식이 아닙니다"); return; }
+    if (!confirm("아이 " + parsed.children.length + "명, 기록 " + parsed.entries.length +
       "건으로 되돌립니다.\n지금 기록 " + S.entries.length + "건은 사라집니다. 계속할까요?")) return;
-    parsed.rev = (S.rev || 0) + 1;
-    S = parsed;
+    // Draw first, save only if drawing worked. Saving a state the app cannot
+    // render leaves a blank app that survives a reload.
+    var prev = S, prevTab = ui.tab, prevSlot = ui.slotId, prevPick = ui.pick;
+    S = parsed; ui.tab = "record"; ui.slotId = null; ui.pick = null;
+    try{
+      render(true);
+    }catch(err){
+      S = prev; ui.tab = prevTab; ui.slotId = prevSlot; ui.pick = prevPick;
+      render(true);
+      toast("이 백업은 열 수 없습니다. 복사한 내용을 다시 확인해 주세요");
+      return;
+    }
+    bumpRev(S, prev.rev);
     var ok = writeStore();
-    ui.tab = "record"; ui.slot = 0; ui.pick = null;
-    render(true);
     toast(ok ? "복원했습니다" : "복원했지만 저장되지 않았습니다");
   };
   r0.appendChild(b0);
@@ -1162,6 +1275,20 @@ function viewData(){
     add:function(st, name){ st.children.push({id:uid(), name:name}); },
     rename:function(st, id, name){
       st.children.forEach(function(c){ if (c.id === id) c.name = name; });
+    },
+    bulkApply:function(st, names){
+      var byName = {}, used = {};
+      st.children.forEach(function(c){ if (!(c.name in byName)) byName[c.name] = c; });
+      var next = names.map(function(n){
+        var hit = byName[n];
+        if (hit && !used[hit.id]){ used[hit.id] = 1; return hit; }
+        return {id:uid(), name:n};
+      });
+      var keep = {};
+      next.forEach(function(c){ keep[c.id] = 1; });
+      st.children = next;
+      st.entries = st.entries.filter(function(e){ return keep[e.childId]; });
+      st.demo = false;
     }
   }));
 
@@ -1209,6 +1336,19 @@ function viewData(){
     rename:function(st, id, name){
       st.slots.forEach(function(s){ if (s.id === id) s.name = name; });
     },
+    bulkApply:function(st, names){
+      var byName = {}, used = {};
+      st.slots.forEach(function(s){ if (!(s.name in byName)) byName[s.name] = s; });
+      var next = names.map(function(n){
+        var hit = byName[n];
+        if (hit && !used[hit.id]){ used[hit.id] = 1; return hit; }
+        return {id:uid(), name:n};
+      });
+      var keep = {};
+      next.forEach(function(s){ keep[s.id] = 1; });
+      st.slots = next;
+      st.entries = st.entries.filter(function(e){ return keep[e.slotId]; });
+    },
     minOne:true
   }));
 
@@ -1253,10 +1393,10 @@ function viewData(){
   d1.onclick = function(){
     if (!confirm("지금 기록을 모두 버리고 예시 데이터로 되돌립니다. 계속할까요?")) return;
     var fresh = demoState();
-    fresh.rev = (S.rev || 0) + 1;
+    bumpRev(fresh, S.rev);
     S = fresh;
     var ok = writeStore();
-    ui.tab = "record"; ui.slot = 0; ui.pick = null;
+    ui.tab = "record"; ui.slotId = null; ui.pick = null;
     render(true); toast(ok ? "예시 데이터로 되돌렸습니다" : "저장되지 않았습니다");
   };
   var d2 = document.createElement("button");
@@ -1289,6 +1429,11 @@ function rowEditor(cfg){
     inp.onchange = function(){
       var name = inp.value.trim();
       if (!name){ inp.value = item.name; toast("이름을 비울 수 없습니다"); return; }
+      // Same-name children are common in a class; allow it, but say so —
+      // nothing on the cards or the picker distinguishes them.
+      if (name !== item.name && cfg.list.some(function(it){ return it.id !== item.id && it.name === name; })){
+        toast("같은 이름이 이미 있어요");
+      }
       var ok = mutate(function(st){ cfg.rename(st, item.id, name); });
       if (!ok) toast("저장되지 않았습니다");
       renderTop();
@@ -1307,6 +1452,9 @@ function rowEditor(cfg){
     rows.appendChild(row);
   });
   p.appendChild(rows);
+
+  var addRow = document.createElement("div");
+  addRow.className = "row-btns";
   var add = document.createElement("button");
   add.className = "row-add"; add.textContent = cfg.addLabel;
   add.onclick = function(){
@@ -1314,11 +1462,62 @@ function rowEditor(cfg){
     if (name === null) return;
     name = name.trim();
     if (!name) return;
+    if (nameTaken(name)) toast("같은 이름이 이미 있어요");
     var ok = mutate(function(st){ cfg.add(st, name); });
     render(); toast(ok ? "추가했습니다" : "저장되지 않았습니다");
   };
-  p.appendChild(add);
+  addRow.appendChild(add);
+
+  // Setting up a class one prompt() at a time is 25+ modal taps — the first
+  // five minutes of the pilot, and the place it would stall.
+  if (cfg.bulkApply){
+    var bulkBtn = document.createElement("button");
+    bulkBtn.className = "row-add"; bulkBtn.textContent = "여러 개 한 번에";
+    addRow.appendChild(bulkBtn);
+    var box = document.createElement("div");
+    box.hidden = true;
+    var ta = document.createElement("textarea");
+    ta.className = "edit-area";
+    ta.placeholder = "한 줄에 하나씩 붙여넣으세요";
+    ta.setAttribute("aria-label", cfg.title + " 한 번에 입력");
+    var apply = document.createElement("button");
+    apply.className = "btn-sm primary"; apply.textContent = "이 목록으로 교체";
+    apply.style.marginTop = "8px";
+    apply.onclick = function(){
+      var names = ta.value.split("\n").map(function(x){ return x.trim(); }).filter(Boolean);
+      if (!names.length){ toast("한 줄에 하나씩 입력해 주세요"); return; }
+      var keptNames = {};
+      names.forEach(function(n){ keptNames[n] = 1; });
+      var dropped = cfg.list.filter(function(it){ return !keptNames[it.name]; });
+      var lostRecords = dropped.reduce(function(sum, it){ return sum + cfg.countOf(it); }, 0);
+      var msg = cfg.title + "을(를) " + names.length + "개로 바꿉니다.";
+      if (dropped.length) msg += "\n빠지는 " + dropped.length + "개" +
+        (lostRecords ? "의 기록 " + lostRecords + "건도 함께 사라집니다." : " 는 기록이 없습니다.");
+      msg += "\n계속할까요?";
+      if (!confirm(msg)) return;
+      var ok = mutate(function(st){ cfg.bulkApply(st, names); });
+      ui.slotId = null; ui.pick = null;
+      render(); toast(ok ? "목록을 바꿨습니다" : "저장되지 않았습니다");
+    };
+    box.appendChild(ta); box.appendChild(apply);
+    bulkBtn.onclick = function(){
+      box.hidden = !box.hidden;
+      if (!box.hidden){
+        ta.value = cfg.list.map(function(it){ return it.name; }).join("\n");
+        ta.focus();
+      }
+    };
+    p.appendChild(addRow);
+    p.appendChild(box);
+    return p;
+  }
+
+  p.appendChild(addRow);
   return p;
+
+  function nameTaken(name){
+    return cfg.list.some(function(it){ return it.name === name; });
+  }
 }
 
 /* ---------------- routing ---------------- */
@@ -1370,7 +1569,11 @@ window.addEventListener("storage", function(e){
   var fresh = readStore();
   if (fresh && (fresh.rev || 0) > (S.rev || 0)){
     S = fresh;
-    if (!document.getElementById("sheet").classList.contains("open")) render();
+    // Don't redraw over a sheet in progress, or over the data tab where
+    // someone may be part-way through typing a name or pasting a backup.
+    if (document.getElementById("sheet").classList.contains("open")) return;
+    if (ui.tab === "data") return;
+    render();
   }
 });
 
