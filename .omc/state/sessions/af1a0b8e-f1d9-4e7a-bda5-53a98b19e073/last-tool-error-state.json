@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls -la && echo \\\"=== \\\" && curl -s http://127.0.0.1:8931/ | cmp - dist/index.html && echo IDENTICAL || echo DIFFERS; cd /Users/modoofind/dev/teacher_support && curl -s http://127.0.0.1:893...",
+  "error": "Exit code 2\ntotal 152\ndrwxr-xr-x  12 modoofind  staff    384 Sep 10 00:09 .\ndrwxr-xr-x@  9 modoofind  staff    288 Sep  9 22:35 ..\ndrwxr-xr-x@  3 modoofind  staff     96 Sep  9 23:03 .claude\ndrwxr-xr-x@ 12 modoofind  staff    384 Sep 10 00:07 .git\n-rw-r--r--@  1 modoofind  staff     19 Sep 10 00:09 .gitignore\ndrwxr-xr-x@  3 modoofind  staff     96 Sep 10 00:10 .omc\n-rw-r--r--@  1 modoofind  staff   3116 Sep  9 23:27 CONTEXT.md\n-rw-r--r--@  1 modoofind  staff   3895 Sep 10 00:09 README.md\n-rwxr-x...",
+  "timestamp": "2026-09-09T15:10:10.712Z",
+  "retry_count": 2
+}

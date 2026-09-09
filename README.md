@@ -22,21 +22,42 @@
 
 | 경로 | 용도 |
 |---|---|
-| `index.html` | 원본. Artifact 본문 규격이라 `<!doctype>`·`<head>`·`<body>`가 없습니다 |
-| `build.sh` | 원본을 완전한 HTML 문서로 감싸 `dist/`를 만듭니다 |
-| `dist/index.html` | 자체 호스팅용 완전판 (PWA 메타 포함) |
-| `dist/manifest.json`, `dist/icon.svg` | 홈 화면 추가용 |
+| `index.html` | **원본.** Artifact 본문 규격이라 `<!doctype>`·`<head>`·`<body>`가 없습니다 |
+| `static/` | 부속 파일 원본 — `manifest.json`, `icon.svg`, `sw.js` |
+| `build.sh` | 원본을 완전한 HTML 문서로 감싸 `docs/`를 만듭니다 |
+| `docs/` | **배포 산출물.** GitHub Pages가 이 폴더를 그대로 서빙합니다 |
+| `docs/adr/` | 결정 기록. 산출물이 아니라 문서이므로 빌드가 건드리지 않습니다 |
 
-편집은 `index.html`에만 하고, `./build.sh`로 `dist/`를 다시 만듭니다.
+편집은 `index.html`과 `static/`에만 하고, `./build.sh`로 `docs/`를 다시 만듭니다.
+`docs/index.html`을 직접 고치면 다음 빌드에서 덮어써집니다.
 
-## 자체 호스팅
+## 배포 (GitHub Pages)
 
-정적 파일 3개뿐이라 아무 웹서버에나 `dist/` 내용을 올리면 됩니다.
-**HTTPS여야 홈 화면 추가와 standalone 표시가 정상 동작합니다.**
+저장소 **Settings → Pages → Source**를 **"Deploy from a branch"**,
+브랜치 `main`, 폴더 `/docs`로 설정하면 push할 때마다 반영됩니다.
+
+고친 뒤 배포하는 순서:
+
+    ./build.sh && git add -A && git commit -m "설명" && git push
+
+**HTTPS여야 홈 화면 추가와 오프라인 동작이 정상입니다.** GitHub Pages는 기본 HTTPS입니다.
 
 로컬 확인:
 
-    python3 -m http.server 8931 --bind 127.0.0.1 --directory dist
+    python3 -m http.server 8931 --bind 127.0.0.1 --directory docs
+
+## 아이폰에 설치하는 법 (실사용자에게 전달할 내용)
+
+**반드시 사파리로 열어야 합니다.** 크롬으로 열면 그냥 웹페이지이고,
+iOS가 7일간 방문이 없으면 저장된 기록을 지웁니다.
+
+1. 사파리로 링크를 엽니다
+2. 아래 공유 버튼(↑) → **"홈 화면에 추가"**
+3. 이후에는 홈 화면 아이콘으로만 엽니다
+
+홈 화면 앱으로 쓰면 7일 삭제 규칙에서 제외되지만, 사파리 방문 기록·데이터를
+지우면 기록도 함께 사라집니다. **데이터 탭의 백업 버튼으로 며칠에 한 번
+카톡에 보내두세요.** 마지막 백업이 5일이 지나면 첫 화면에 배너가 뜹니다.
 
 ## 데이터
 

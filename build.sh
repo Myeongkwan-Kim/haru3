@@ -1,12 +1,12 @@
 #!/bin/sh
-# index.html (Artifact 본문 규격: doctype/head/body 없음)을 자체 호스팅용
-# 완전한 HTML 문서로 감싸고, static/ 의 부속 파일과 함께 dist/ 를 만든다.
-# dist/ 는 산출물이므로 직접 고치지 말 것.
+# index.html (Artifact 본문 규격: doctype/head/body 없음)을 GitHub Pages 배포용
+# 완전한 HTML 문서로 감싸고, static/ 의 부속 파일과 함께 docs/ 를 만든다 (Pages 소스 = main 브랜치 /docs).
+# docs/index.html 등은 산출물이므로 직접 고치지 말 것. docs/adr/ 는 문서라 건드리지 않는다.
 set -e
 cd "$(dirname "$0")"
 SPLIT=$(grep -n '^<div id="app">' index.html | head -1 | cut -d: -f1)
-rm -rf dist
-mkdir -p dist
+rm -rf docs/index.html docs/manifest.json docs/icon.svg docs/sw.js
+mkdir -p docs
 {
   cat <<'HEAD'
 <!doctype html>
@@ -29,6 +29,6 @@ HEAD
   tail -n +$SPLIT index.html
   echo '</body>'
   echo '</html>'
-} > dist/index.html
-cp static/* dist/
-echo "dist/ 생성 완료: $(ls dist | tr '\n' ' ')"
+} > docs/index.html
+cp static/* docs/
+echo "docs/ 생성 완료"
