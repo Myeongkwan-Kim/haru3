@@ -1476,6 +1476,12 @@ function rowEditor(cfg){
     addRow.appendChild(bulkBtn);
     var box = document.createElement("div");
     box.hidden = true;
+    var warn = document.createElement("p");
+    warn.style.color = "var(--warn)";
+    warn.style.marginTop = "10px";
+    warn.innerHTML = "<b>처음 명단을 만들 때만 쓰세요.</b> 여기서 이름을 고치면 " +
+      "그 아이는 빠지고 새 아이가 생겨 기록이 사라집니다. " +
+      "<b>이름 수정은 위 목록에서 직접</b> 하세요.";
     var ta = document.createElement("textarea");
     ta.className = "edit-area";
     ta.placeholder = "한 줄에 하나씩 붙여넣으세요";
@@ -1499,7 +1505,7 @@ function rowEditor(cfg){
       ui.slotId = null; ui.pick = null;
       render(); toast(ok ? "목록을 바꿨습니다" : "저장되지 않았습니다");
     };
-    box.appendChild(ta); box.appendChild(apply);
+    box.appendChild(warn); box.appendChild(ta); box.appendChild(apply);
     bulkBtn.onclick = function(){
       box.hidden = !box.hidden;
       if (!box.hidden){
