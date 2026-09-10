@@ -507,7 +507,7 @@ function blank(){
     tags:JSON.parse(JSON.stringify(DEFAULT_TAGS)),
     entries:[],
     lastExport:null,
-    skin:"plain",
+    skin:"cute",
     group:"우리 반"
   };
 }
@@ -563,7 +563,8 @@ function normalize(p){
   if (typeof p.rev !== "number") p.rev = 0;
   if (typeof p.lastExport !== "string") p.lastExport = null;
   p.demo = !!p.demo;
-  p.skin = (p.skin === "cute") ? "cute" : "plain";
+  // 기본값은 말랑말랑. 명시적으로 기본 테마를 고른 사람만 plain으로 남는다.
+  p.skin = (p.skin === "plain") ? "plain" : "cute";
   p.group = (typeof p.group === "string" && p.group.trim()) ? p.group.trim() : "우리 반";
   return p;
 }
