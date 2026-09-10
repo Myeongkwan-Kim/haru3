@@ -33,6 +33,10 @@
   --warn-soft:#FBF0E1;
   --danger:#9E3617;
   --danger-line:#D8B3A8;
+  --good:#2F6B5C;
+  --good-soft:#E3F0E9;
+  --watch:#8C5411;
+  --watch-soft:#FBF0E1;
   --mood-a:#2E5C86;
   --mood-b:#6E9DC4;
   --mood-c:#9A9E9B;
@@ -59,6 +63,10 @@
     --warn-soft:#2B241A;
     --danger:#E3937A;
     --danger-line:#553A31;
+    --good:#5FA894;
+    --good-soft:#1E2E2A;
+    --watch:#D9A45C;
+    --watch-soft:#2B241A;
     --mood-a:#8FBBE0;
     --mood-b:#5E90B8;
     --mood-c:#767C79;
@@ -85,6 +93,10 @@
   --warn-soft:#2B241A;
   --danger:#E3937A;
   --danger-line:#553A31;
+  --good:#5FA894;
+  --good-soft:#1E2E2A;
+  --watch:#D9A45C;
+  --watch-soft:#2B241A;
   --mood-a:#8FBBE0;
   --mood-b:#5E90B8;
   --mood-c:#767C79;
@@ -93,7 +105,6 @@
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
   --sheet-shadow:0 -2px 32px rgba(0,0,0,.5);
 }
-
 /* 귀여운 테마. 한 가지 밝은 세계에 의도적으로 고정하므로 다크 대응을 두지
    않는다. 다크 블록들보다 뒤에 있어야 어떤 기기 설정에서도 이긴다.
    상태 축(mood) 색만은 기본 테마와 같은 값을 쓴다 — 그 색은 장식이 아니라
@@ -115,6 +126,10 @@
   --warn-soft:#FFF1DC;
   --danger:#B24A33;
   --danger-line:#E0B5A6;
+  --good:#3E8A62;
+  --good-soft:#E6F4EA;
+  --watch:#94531F;
+  --watch-soft:#FFF1DC;
   --shadow:0 2px 0 #F0DCCB, 0 6px 18px rgba(122,86,62,.10);
   --sheet-shadow:0 -2px 28px rgba(122,86,62,.20);
 }
@@ -126,19 +141,18 @@
 :root[data-skin="cute"] .today,
 :root[data-skin="cute"] .btn,
 :root[data-skin="cute"] .btn-sm.primary,
-:root[data-skin="cute"] .stat .v{
+:root[data-skin="cute"] .tally-item b{
   font-family:'Jua','IBM Plex Sans KR',sans-serif;
   letter-spacing:0;
   font-weight:400;
 }
-/* 파스텔 채움은 흰 바탕과 거의 구분되지 않으므로 눌리는 것에는 테두리를 남긴다 */
 :root[data-skin="cute"] .btn,
 :root[data-skin="cute"] .btn-sm.primary,
-:root[data-skin="cute"] .slot[aria-pressed="true"],
-:root[data-skin="cute"] .tag[aria-pressed="true"]{border:1px solid var(--line-2)}
+:root[data-skin="cute"] .range[aria-pressed="true"]{border:1px solid var(--line-2)}
 :root[data-skin="cute"] .card{border-radius:18px;box-shadow:var(--shadow)}
 :root[data-skin="cute"] .card:active{transform:scale(.95)}
-:root[data-skin="cute"] .panel{border-radius:18px}
+:root[data-skin="cute"] .panel,
+:root[data-skin="cute"] .entry{border-radius:18px}
 :root[data-skin="cute"] .btn,
 :root[data-skin="cute"] .btn-ghost,
 :root[data-skin="cute"] .btn-sm,
@@ -148,9 +162,9 @@
 :root[data-skin="cute"] .note-in,
 :root[data-skin="cute"] .out,
 :root[data-skin="cute"] .edit-area{border-radius:14px}
-:root[data-skin="cute"] .tag{border-radius:999px}
+:root[data-skin="cute"] .word,
+:root[data-skin="cute"] .range{border-radius:999px}
 :root[data-skin="cute"] .mood{border-radius:20px;padding:12px 2px 11px}
-/* 파스텔 채움끼리는 서로 비슷해서, 눌리지 않는 버튼임을 테두리로도 말해준다 */
 :root[data-skin="cute"] .btn:disabled{background:var(--surface-2);border-color:var(--line);color:var(--ink-3)}
 :root[data-skin="cute"] .sheet{border-radius:26px 26px 0 0}
 :root[data-skin="cute"] .gaps{border-radius:4px 16px 16px 4px}
@@ -181,186 +195,120 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 textarea,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:4px}
 .mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums}
-/* 한글이 섞인 자리에는 mono 대신 tnum — Plex Mono에 한글이 없어 자간이 벌어진다 */
 .tnum{font-variant-numeric:tabular-nums}
 
 #app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
 
-/* ---------- alert ---------- */
-.alert{
-  position:sticky;top:0;z-index:40;
-  background:var(--danger);color:#fff;
-  padding:11px 16px;font-size:13.5px;line-height:1.5;font-weight:500;
-}
+.alert{position:sticky;top:0;z-index:40;background:var(--danger);color:#fff;padding:11px 16px;font-size:13.5px;line-height:1.5;font-weight:500}
 .alert b{font-weight:700}
 
-/* ---------- header ---------- */
-.top{
-  position:sticky;top:0;z-index:20;
-  background:var(--ground);
-  border-bottom:1px solid var(--line);
-}
-.top-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 8px}
+.top{position:sticky;top:0;z-index:20;background:var(--ground);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px}
 .today{font-size:13px;color:var(--ink-2);letter-spacing:.02em}
 .today b{color:var(--ink);font-weight:600}
 .today .klass{color:var(--accent-strong);font-weight:600;margin-right:2px}
 .count-today{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
-.slots{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
-.slots::-webkit-scrollbar{display:none}
-.slot{
-  flex:0 0 auto;padding:11px 14px;border-radius:999px;min-height:44px;
-  border:1px solid var(--line-2);color:var(--ink-2);
-  font-size:13.5px;font-weight:500;white-space:nowrap;
-  transition:background .12s,color .12s,border-color .12s;
-}
-.slot[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 
-/* ---------- body ---------- */
 main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 .sec-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .sec-title{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink-2)}
 .sec-note{font-size:12px;color:var(--ink-3)}
 
-/* gap callout — the one lifted element on the page */
-.gaps{
-  background:var(--warn-soft);
-  border-left:3px solid var(--warn);
-  border-radius:2px 10px 10px 2px;
-  padding:13px 15px;
-}
+.gaps{background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:2px 10px 10px 2px;padding:13px 15px}
 .gaps .sec-title{color:var(--warn)}
 .gap-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;align-items:center}
-.gap-chip{
-  display:inline-flex;align-items:baseline;gap:6px;
-  background:var(--surface);border:1px solid var(--line-2);
-  padding:6px 11px;border-radius:999px;font-size:14px;font-weight:500;
-}
+.gap-chip{display:inline-flex;align-items:baseline;gap:6px;background:var(--surface);border:1px solid var(--line-2);padding:6px 11px;border-radius:999px;font-size:14px;font-weight:500}
 .gap-chip .d{font-size:11.5px;color:var(--warn);font-weight:600}
 .gap-more{font-size:12.5px;color:var(--warn);font-weight:600}
 .gaps-clear{font-size:13.5px;color:var(--ink-2);margin-top:2px}
 
-/* child grid */
+/* 아이 목록. 기록 내용은 절대 싣지 않는다 — 아이들이 옆에서 화면을 본다. */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.card{
-  background:var(--surface);border:1px solid var(--line-2);border-radius:12px;
-  padding:12px 13px;text-align:left;display:flex;flex-direction:column;gap:7px;
-  min-height:78px;transition:border-color .12s,transform .06s;
-}
+.card{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:12px 13px;text-align:left;display:flex;flex-direction:column;gap:7px;min-height:74px;transition:border-color .12s,transform .06s}
 .card:active{transform:scale(.985)}
 .card.done{border-color:var(--accent-strong);background:var(--accent-soft)}
 .card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .name{font-size:16px;font-weight:600;letter-spacing:-.01em}
 .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
 .card-meta{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
-.card-meta .since.stale{color:var(--warn);font-weight:600}
-.mini-mood{display:inline-block;width:22px;height:4px;border-radius:2px;flex:0 0 auto}
+.card-meta .stale{color:var(--warn);font-weight:600}
 
-/* ---------- bottom nav ---------- */
-.nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:30;
-  background:var(--surface);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom);
-}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 .nav-inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
 .nav button{padding:11px 0 13px;font-size:12px;font-weight:500;color:var(--ink-3);display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav button[aria-current="page"]{color:var(--accent-strong);font-weight:600}
 .nav .ico{font-size:17px;line-height:1}
 
-/* ---------- sheet ---------- */
 .scrim{position:fixed;inset:0;background:rgba(16,24,22,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .18s}
 .scrim.open{opacity:1;pointer-events:auto}
-.sheet{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;
-  max-width:520px;margin:0 auto;
-  background:var(--surface);border-radius:18px 18px 0 0;
-  box-shadow:var(--sheet-shadow);
-  transform:translateY(102%);
-  visibility:hidden;
-  transition:transform .22s cubic-bezier(.2,.8,.3,1), visibility 0s .22s;
-  max-height:88vh;display:flex;flex-direction:column;
-}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:520px;margin:0 auto;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:var(--sheet-shadow);transform:translateY(102%);visibility:hidden;transition:transform .22s cubic-bezier(.2,.8,.3,1), visibility 0s .22s;max-height:92vh;display:flex;flex-direction:column}
 .sheet.open{transform:translateY(0);visibility:visible;transition:transform .22s cubic-bezier(.2,.8,.3,1), visibility 0s}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 14px 10px 18px;border-bottom:1px solid var(--line)}
 .sheet-title{font-size:19px;font-weight:700;letter-spacing:-.02em}
 .sheet-sub{font-size:12px;color:var(--ink-3);margin-top:1px}
 .sheet-close{font-size:14px;color:var(--ink-2);padding:12px;margin:-6px;min-width:44px;min-height:44px}
-.sheet-body{padding:14px 18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;-webkit-overflow-scrolling:touch}
+.sheet-body{padding:14px 18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
 .field-label{font-size:12px;font-weight:600;letter-spacing:.05em;color:var(--ink-2);margin-bottom:8px}
 .field-hint{font-weight:400;color:var(--ink-3);letter-spacing:0}
 
-.tag-group{margin-bottom:11px}
-.tag-group-name{font-size:11px;color:var(--ink-3);margin-bottom:5px;letter-spacing:.05em}
-.tag-row{display:flex;flex-wrap:wrap;gap:6px}
-.tag{
-  padding:12px 13px;border-radius:8px;border:1px solid var(--line-2);min-height:44px;
-  font-size:13.5px;color:var(--ink-2);background:var(--surface);
-}
-.tag[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
-.tag.retired{border-style:dashed}
+.note-in{width:100%;border:1px solid var(--line-2);border-radius:10px;padding:12px 13px;background:var(--surface);resize:none;font-size:16px;line-height:1.6;min-height:104px}
+.note-in::placeholder{color:var(--ink-3);font-size:14.5px}
+
+/* 자주 쓴 말: 미리 만든 분류가 아니라 본인이 쓴 표현이 돌아오는 것이다. */
+.words{display:flex;flex-wrap:wrap;gap:6px}
+.word{padding:9px 12px;border-radius:8px;border:1px solid var(--line-2);font-size:13.5px;color:var(--ink-2);background:var(--surface);min-height:40px}
 
 .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
-.mood{
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  padding:10px 2px 9px;border-radius:8px;border:1px solid var(--line);
-  background:var(--surface);
-}
+.mood{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px 9px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
 .mood .em{font-size:21px;line-height:1}
 .mood .lb{font-size:10.5px;color:var(--ink-3);letter-spacing:-.02em}
 .mood .bar{width:100%;height:4px;border-radius:2px}
 .mood[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-2)}
 .mood[aria-pressed="true"] .lb{color:var(--ink);font-weight:600}
 
-.note-in{
-  width:100%;border:1px solid var(--line-2);border-radius:9px;
-  padding:10px 12px;background:var(--surface);resize:none;font-size:16px;
-}
-.note-in::placeholder{color:var(--ink-3);font-size:14.5px}
-
 .sheet-foot{padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:12px}
-.btn{
-  flex:1;padding:14px;border-radius:11px;font-size:15.5px;font-weight:600;
-  background:var(--accent);color:var(--accent-ink);
-}
+.btn{flex:1;padding:14px;border-radius:11px;font-size:15.5px;font-weight:600;background:var(--accent);color:var(--accent-ink)}
 .btn:disabled{background:var(--surface-2);color:var(--ink-2);cursor:default}
 .btn-ghost{flex:0 0 auto;padding:14px 16px;border-radius:11px;border:1px solid var(--danger-line);font-size:14.5px;color:var(--danger);background:var(--surface)}
 
-/* ---------- child detail ---------- */
+/* ---------- 상담 화면 ---------- */
 .picker{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .picker::-webkit-scrollbar{display:none}
 .pick{flex:0 0 auto;padding:11px 14px;border-radius:999px;min-height:44px;border:1px solid var(--line-2);font-size:13.5px;color:var(--ink-2);white-space:nowrap}
 .pick[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:600}
 
 .child-name{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0}
-.stat-row{display:flex;gap:20px;padding:2px 0 4px}
-.stat .v{font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
-.stat .k{font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+.ranges{display:flex;gap:6px;flex-wrap:wrap}
+.range{padding:9px 13px;border-radius:8px;border:1px solid var(--line-2);font-size:13px;color:var(--ink-2);min-height:40px}
+.range[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 
-.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;align-items:end;height:76px}
-.dist-col{display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
-.dist-n{font-size:11.5px;color:var(--ink-2);font-weight:500}
-.dist-bar{width:100%;border-radius:4px 4px 0 0;min-height:3px}
-.dist-lb{font-size:15px;line-height:1}
-.dist-cap{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:5px}
-.dist-cap span{font-size:10px;color:var(--ink-3);text-align:center;letter-spacing:-.02em}
+.tally{display:flex;gap:8px;flex-wrap:wrap}
+.tally-item{display:inline-flex;align-items:baseline;gap:6px;padding:8px 12px;border-radius:8px;font-size:13px;background:var(--surface-2);color:var(--ink-2)}
+.tally-item b{font-size:15px;font-weight:700;color:var(--ink)}
+.tally-item.good{background:var(--good-soft);color:var(--good)}
+.tally-item.good b{color:var(--good)}
+.tally-item.watch{background:var(--watch-soft);color:var(--watch)}
+.tally-item.watch b{color:var(--watch)}
 
-.freq{display:flex;flex-direction:column;gap:7px}
-.freq-row{display:grid;grid-template-columns:1fr 34px;gap:9px;align-items:center}
-.freq-label{font-size:13.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.freq-track{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
-.freq-fill{height:100%;background:var(--accent-strong);border-radius:3px}
-.freq-n{font-size:12px;color:var(--ink-3);text-align:right}
+.only-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:11px 13px}
+.only-toggle span{font-size:13.5px;color:var(--ink-2)}
+.only-toggle button{font-size:13px;font-weight:600;color:var(--accent-strong);padding:8px 12px;border:1px solid var(--line-2);border-radius:999px;min-height:38px}
+.only-toggle button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 
-.log{display:flex;flex-direction:column;gap:0}
-.log-item{display:grid;grid-template-columns:60px 1fr;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
-.log-when{font-size:11.5px;color:var(--ink-3);line-height:1.45}
-.log-when b{display:block;color:var(--ink-2);font-weight:600}
-.log-body{display:flex;flex-direction:column;gap:5px}
-.log-tags{display:flex;flex-wrap:wrap;gap:5px}
-.log-tag{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2)}
-.log-mood{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2)}
-.log-note{font-size:14px;color:var(--ink);line-height:1.55}
+.entries{display:flex;flex-direction:column;gap:8px}
+.entry{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.entry.good{background:var(--good-soft);border-color:var(--good)}
+.entry.watch{background:var(--watch-soft);border-color:var(--watch)}
+.entry-top{display:flex;align-items:baseline;gap:8px}
+.entry-date{font-size:11.5px;color:var(--ink-3);flex:0 0 auto}
+.entry-mood{font-size:12.5px;color:var(--ink-2)}
+.entry-text{font-size:15px;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.entry-acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mark-btn{padding:8px 12px;border-radius:999px;border:1px solid var(--line-2);font-size:12.5px;color:var(--ink-2);background:var(--surface);min-height:38px}
+.mark-btn.good[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff;font-weight:600}
+.mark-btn.watch[aria-pressed="true"]{background:var(--watch);border-color:var(--watch);color:#fff;font-weight:600}
+.entry-edit{margin-left:auto;font-size:12.5px;color:var(--ink-3);padding:8px 10px;min-height:38px}
 
-/* ---------- data tab ---------- */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 16px;display:flex;flex-direction:column;gap:12px}
 .panel h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
 .panel p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.6}
@@ -371,36 +319,19 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 
 .rows{display:flex;flex-direction:column;gap:7px}
 .row-edit{display:grid;grid-template-columns:1fr 44px;gap:7px;align-items:center}
-.row-in{
-  width:100%;border:1px solid var(--line-2);border-radius:9px;
-  padding:11px 12px;background:var(--ground);font-size:16px;min-height:44px;
-}
-.row-del{
-  min-height:44px;border:1px solid var(--line-2);border-radius:9px;
-  color:var(--ink-3);font-size:17px;line-height:1;
-}
+.row-in{width:100%;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;background:var(--ground);font-size:16px;min-height:44px}
+.row-del{min-height:44px;border:1px solid var(--line-2);border-radius:9px;color:var(--ink-3);font-size:17px;line-height:1}
 .row-add{align-self:flex-start;padding:11px 14px;border-radius:9px;border:1px dashed var(--line-2);font-size:13.5px;color:var(--ink-2);min-height:44px}
-
 .edit-area{width:100%;min-height:112px;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;background:var(--ground);font-size:16px;line-height:1.65;resize:vertical}
 .out{width:100%;min-height:100px;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;background:var(--ground);font-size:12px;line-height:1.5;resize:vertical;font-family:'IBM Plex Mono',ui-monospace,monospace}
 
-/* banner */
-.banner{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:var(--accent-soft);border:1px solid var(--line-2);
-  border-radius:10px;padding:11px 13px;font-size:13px;color:var(--ink-2);
-}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--accent-soft);border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font-size:13px;color:var(--ink-2)}
 .banner.warn{background:var(--warn-soft);border-color:var(--warn)}
 .banner b{color:var(--ink);font-weight:600}
 .banner button{font-size:13px;font-weight:600;color:var(--accent-strong);white-space:nowrap;padding:6px 0}
 .banner.warn button{color:var(--warn)}
 
-.toast{
-  position:fixed;left:50%;bottom:78px;transform:translate(-50%,14px);
-  background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:999px;
-  font-size:13.5px;font-weight:500;z-index:70;opacity:0;pointer-events:none;
-  transition:opacity .18s,transform .18s;max-width:88%;text-align:center;
-}
+.toast{position:fixed;left:50%;bottom:78px;transform:translate(-50%,14px);background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:500;z-index:70;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:88%;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .empty{padding:28px 6px;text-align:center;color:var(--ink-3);font-size:13.5px;line-height:1.7}
@@ -419,13 +350,12 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
       <div class="today" id="todayLine"></div>
       <div class="count-today tnum" id="countLine"></div>
     </div>
-    <div class="slots" id="slotBar"></div>
   </div>
   <main id="view"></main>
   <nav class="nav">
     <div class="nav-inner">
       <button data-tab="record" aria-current="page"><span class="ico">✎</span>기록</button>
-      <button data-tab="child"><span class="ico">◔</span>아이별</button>
+      <button data-tab="child"><span class="ico">◔</span>상담</button>
       <button data-tab="data"><span class="ico">⤓</span>데이터</button>
     </div>
   </nav>
@@ -442,16 +372,15 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
   </div>
   <div class="sheet-body" id="sheetBody">
     <div>
-      <div class="field-label">무슨 일이 있었나 <span class="field-hint">— 사실만</span></div>
-      <div id="tagBox"></div>
+      <textarea class="note-in" id="noteIn" rows="4" placeholder="짧게 흘려 써도 됩니다&#10;예) 블록 무너지자 울음 → 혼자 다시 쌓음"></textarea>
+    </div>
+    <div id="wordWrap" hidden>
+      <div class="field-label">자주 쓰신 말 <span class="field-hint">— 눌러서 넣기</span></div>
+      <div class="words" id="wordBox"></div>
     </div>
     <div>
-      <div class="field-label">선생님이 본 아이 상태 <span class="field-hint">— 해석</span></div>
+      <div class="field-label">그때 아이 상태 <span class="field-hint">— 안 골라도 됩니다</span></div>
       <div class="moods" id="moodBox"></div>
-    </div>
-    <div>
-      <div class="field-label">한 줄 <span class="field-hint">— 생각나면</span></div>
-      <textarea class="note-in" id="noteIn" rows="2" placeholder="비워둬도 됩니다"></textarea>
     </div>
   </div>
   <div class="sheet-foot">
@@ -468,7 +397,7 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 
 /* ---------------- constants ---------------- */
 var KEY = "haru3.v1";
-var SCHEMA = 2;
+var SCHEMA = 3;
 var MOODS = [
   {v:-2, em:"😔", lb:"위축", c:"var(--mood-a)"},
   {v:-1, em:"😕", lb:"시무룩", c:"var(--mood-b)"},
@@ -476,23 +405,30 @@ var MOODS = [
   {v: 1, em:"🙂", lb:"밝음", c:"var(--mood-d)"},
   {v: 2, em:"😄", lb:"활발", c:"var(--mood-e)"}
 ];
-var DEFAULT_SLOTS = ["오전 자유놀이","오전 활동","점심·낮잠","오후 활동"];
-var DEFAULT_TAGS = [
-  {g:"또래", items:["친구와 어울림","다툼·갈등","혼자 놀이","도움을 줌"]},
-  {g:"활동", items:["몰입함","참여 어려움","처음 해냄"]},
-  {g:"정서·몸", items:["울음","크게 웃음","위축·조용함","컨디션 나쁨"]},
-  {g:"기타", items:["선생님을 찾음","규칙 지키기 어려움"]}
-];
 var DEMO_NAMES = ["서준","하윤","도윤","지우","시우","서아","하준","지호","예린","유준","다은","건우"];
+var DEMO_LINES = [
+  "블록 무너지자 울음 → 혼자 다시 쌓음",
+  "오늘도 혼자 놀이. 먼저 다가가진 않음",
+  "친구한테 먼저 같이 하자고 함",
+  "이름 불러도 대답 잘 안 함",
+  "간식 시간에 처음으로 다 먹음",
+  "낮잠 안 자고 계속 뒤척임",
+  "그림 오래 붙잡고 집중함",
+  "줄 서기 어려워함. 자꾸 앞으로"
+];
 var STALE_DAYS = 4;
 var GAP_SHOWN = 6;
 var BACKUP_NAG_DAYS = 5;
+var RANGES = [
+  {k:"1m", lb:"최근 1개월", days:31},
+  {k:"3m", lb:"최근 3개월", days:93},
+  {k:"all", lb:"전체", days:0}
+];
 
 /* ---------------- state ---------------- */
 var S = null;
-// slotId, not an index — deleting a slot must not silently move the
-// selection onto a different one.
-var ui = { tab:"record", slotId:null, pick:null, editing:null, draft:null, openBulk:false };
+var ui = { tab:"record", pick:null, editing:null, draft:null, openBulk:false,
+           range:"3m", onlyMarked:false };
 var storageBroken = false;
 var storageCorrupt = false;
 var lastRenderedDay = null;
@@ -511,15 +447,16 @@ function esc(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-/* ---------------- schema ---------------- */
+/* ---------------- schema ----------------
+   v3에서 태그와 시간대를 걷어냈다. 미리 만든 분류에 생각을 맞추는 일이
+   기록의 실제 부담이었고, 정리는 쓰는 시점이 아니라 읽는 시점(상담 준비)의
+   일이기 때문이다. 자유 텍스트 하나와, 읽으며 칠하는 표시(mark)만 남는다. */
 function blank(){
   return {
     v:SCHEMA,
     rev:0,
     demo:false,
     children:[],
-    slots:DEFAULT_SLOTS.map(function(n){ return {id:uid(), name:n}; }),
-    tags:JSON.parse(JSON.stringify(DEFAULT_TAGS)),
     entries:[],
     lastExport:null,
     skin:"cute",
@@ -527,9 +464,6 @@ function blank(){
   };
 }
 
-// Every field is forced into the shape the app renders. A backup that is
-// merely plausible ("children" and nothing else) must not be able to take
-// the app down — the restore box accepts whatever a person pastes.
 function normalize(p){
   if (!p || typeof p !== "object" || Array.isArray(p)) return null;
 
@@ -538,41 +472,24 @@ function normalize(p){
     .filter(function(c){ return c && typeof c === "object" && c.id; })
     .map(function(c){ return {id:String(c.id), name:String(c.name === undefined ? "이름 없음" : c.name)}; });
 
-  if (!Array.isArray(p.slots)) p.slots = [];
-  p.slots = p.slots.map(function(s){
-    if (s && typeof s === "object" && s.id) return {id:String(s.id), name:String(s.name === undefined ? "시간대" : s.name)};
-    return {id:uid(), name:String(s)};
-  });
-  if (!p.slots.length) p.slots = DEFAULT_SLOTS.map(function(n){ return {id:uid(), name:n}; });
-
-  if (!Array.isArray(p.tags)) p.tags = [];
-  p.tags = p.tags
-    .filter(function(g){ return g && typeof g === "object" && Array.isArray(g.items) && g.items.length; })
-    .map(function(g){
-      return {g:String(g.g === undefined ? "관찰" : g.g), items:g.items.map(String)};
-    });
-  if (!p.tags.length) p.tags = JSON.parse(JSON.stringify(DEFAULT_TAGS));
-
   if (!Array.isArray(p.entries)) p.entries = [];
-  var slotIds = {};
-  p.slots.forEach(function(s){ slotIds[s.id] = 1; });
   p.entries = p.entries
-    .filter(function(e){ return e && typeof e === "object" && e.date && e.childId && e.slotId; })
+    .filter(function(e){ return e && typeof e === "object" && e.date && e.childId; })
     .map(function(e){
-      if (!slotIds[e.slotId]){
-        var revived = {id:uid(), name:"이전 시간대"};
-        p.slots.push(revived); slotIds[revived.id] = 1;
-        e.slotId = revived.id;
-      }
+      var mark = (e.mark === "good" || e.mark === "watch") ? e.mark : null;
       return {
-        id: String(e.id || (e.date + "|" + e.slotId + "|" + e.childId)),
-        date: String(e.date), slotId: String(e.slotId), childId: String(e.childId),
-        tags: Array.isArray(e.tags) ? e.tags.map(String) : [],
+        id: String(e.id || uid()),
+        date: String(e.date), childId: String(e.childId),
+        text: typeof e.text === "string" ? e.text : "",
         mood: (typeof e.mood === "number") ? e.mood : null,
-        note: typeof e.note === "string" ? e.note : "",
+        mark: mark,
         ts: String(e.ts || new Date().toISOString())
       };
-    });
+    })
+    .filter(function(e){ return e.text.trim() !== "" || e.mood !== null; });
+
+  delete p.slots;
+  delete p.tags;
 
   p.v = SCHEMA;
   if (typeof p.rev !== "number") p.rev = 0;
@@ -584,29 +501,20 @@ function normalize(p){
   return p;
 }
 
-// v1 stored slots as bare strings and put the slot NAME inside each entry id,
-// so renaming a slot orphaned every record under the old name. v2 gives each
-// slot a stable id and keys entries on it.
 function migrate(p){
   if (!p || typeof p !== "object" || !Array.isArray(p.children)) return null;
+
+  // v1: 시간대가 문자열이고 기록 id에 그 이름이 박혀 있었다.
   if ((!p.v || p.v < 2) && Array.isArray(p.slots)){
     var map = {};
-    p.slots = (p.slots || DEFAULT_SLOTS).map(function(s){
+    p.slots = p.slots.map(function(s){
       if (s && typeof s === "object" && s.id) return s;
       var o = {id:uid(), name:String(s)};
       map[o.name] = o.id;
       return o;
     });
     p.entries = (p.entries || []).map(function(e){
-      var slotId = e.slotId || map[e.slot];
-      if (!slotId){
-        // A slot name that no longer exists: keep the record by recreating
-        // the slot rather than dropping it on the floor.
-        var extra = {id:uid(), name:e.slot || "이전 기록"};
-        p.slots.push(extra);
-        map[extra.name] = extra.id;
-        slotId = extra.id;
-      }
+      var slotId = e.slotId || map[e.slot] || uid();
       return {
         id: e.date + "|" + slotId + "|" + e.childId,
         date: e.date, slotId: slotId, childId: e.childId,
@@ -614,8 +522,30 @@ function migrate(p){
         note: e.note || "", ts: e.ts || new Date().toISOString()
       };
     });
-    p.v = SCHEMA;
+    p.v = 2;
   }
+
+  // v2 → v3: 태그와 한 줄 메모를 하나의 자유 텍스트로 합치고 시간대를 버린다.
+  if (p.v < 3){
+    var slotName = {};
+    (p.slots || []).forEach(function(s){ if (s && s.id) slotName[s.id] = s.name; });
+    p.entries = (p.entries || []).map(function(e){
+      var bits = [];
+      if (Array.isArray(e.tags) && e.tags.length) bits.push(e.tags.join(", "));
+      if (e.note) bits.push(e.note);
+      var where = slotName[e.slotId];
+      var text = bits.join(" · ");
+      if (where && text) text = "[" + where + "] " + text;
+      else if (where) text = "[" + where + "]";
+      return {
+        id: uid(), date: e.date, childId: e.childId,
+        text: text, mood: (e.mood === undefined ? null : e.mood),
+        mark: null, ts: e.ts || new Date().toISOString()
+      };
+    });
+    p.v = 3;
+  }
+
   return normalize(p);
 }
 
@@ -623,12 +553,9 @@ function demoState(){
   var s = blank();
   s.demo = true;
   s.children = DEMO_NAMES.map(function(n){ return {id:uid(), name:n}; });
-  var pool = [];
-  s.tags.forEach(function(g){ g.items.forEach(function(t){ pool.push(t); }); });
   var seed = 7;
   function rnd(){ seed = (seed*1103515245 + 12345) % 2147483648; return seed/2147483648; }
-  // Two children are deliberately left thin so the "놓치고 있는 아이" section
-  // has something true to say the moment the page opens.
+  // 두 명은 일부러 비워 둔다. 첫 화면의 "놓치고 있는 아이"가 할 말이 있어야 한다.
   var quiet = [3,9];
   for (var back = 6; back >= 0; back--){
     var d = new Date(); d.setDate(d.getDate()-back);
@@ -638,33 +565,25 @@ function demoState(){
       do { ci = Math.floor(rnd()*s.children.length); tries++; }
       while (quiet.indexOf(ci) !== -1 && tries < 40);
       var c = s.children[ci];
-      // Today's records land in the first slot so the opening screen shows
-      // what a filled-in card actually looks like.
-      var slot = back === 0 ? s.slots[0] : s.slots[Math.floor(rnd()*s.slots.length)];
-      var id = date + "|" + slot.id + "|" + c.id;
-      if (s.entries.some(function(e){ return e.id === id; })) continue;
-      var tags = [pool[Math.floor(rnd()*pool.length)]];
-      if (rnd() > .6) tags.push(pool[Math.floor(rnd()*pool.length)]);
       s.entries.push({
-        id:id, date:date, slotId:slot.id, childId:c.id,
-        tags:tags.filter(function(t,i,a){ return a.indexOf(t)===i; }),
-        mood:[-2,-1,0,0,1,1,2][Math.floor(rnd()*7)],
-        note: rnd() > .78 ? "블록을 오래 붙잡고 있었다." : "",
-        ts:new Date().toISOString()
+        id: uid(), date: date, childId: c.id,
+        text: DEMO_LINES[Math.floor(rnd()*DEMO_LINES.length)],
+        mood: [-2,-1,0,0,1,1,2][Math.floor(rnd()*7)],
+        mark: rnd() > .78 ? (rnd() > .5 ? "good" : "watch") : null,
+        ts: new Date().toISOString()
       });
     }
   }
   var q = s.children[3];
   var old = new Date(); old.setDate(old.getDate()-11);
-  s.entries.push({id:iso(old)+"|"+s.slots[1].id+"|"+q.id, date:iso(old), slotId:s.slots[1].id,
-    childId:q.id, tags:["혼자 놀이"], mood:0, note:"", ts:new Date().toISOString()});
+  s.entries.push({id:uid(), date:iso(old), childId:q.id,
+    text:"오늘도 혼자 놀이. 먼저 다가가진 않음", mood:0, mark:null, ts:new Date().toISOString()});
   return s;
 }
 
 /* ---------------- storage ----------------
-   Every write is a read-modify-write against the store, so a tab that has
-   been open since yesterday can no longer wipe what another tab saved in
-   the meantime. Failures are surfaced, never swallowed. */
+   모든 쓰기는 저장소를 다시 읽어 그 위에 얹는다. 어제부터 열려 있던 탭이
+   그 사이 다른 탭이 저장한 것을 지우지 못하게 한다. 실패는 삼키지 않는다. */
 function readStore(){
   var raw = null;
   try{ raw = localStorage.getItem(KEY); }
@@ -675,8 +594,7 @@ function readStore(){
     if (!p) throw new Error("shape");
     return p;
   }catch(e){
-    // "읽지 못했다"와 "비어 있다"는 다르다. 예시 데이터로 조용히 갈아타면
-    // 교사는 초기화된 줄 알고, 첫 저장에서 원본이 덮여 사라진다.
+    // "읽지 못했다"와 "비어 있다"는 다르다. 원본을 보존하고 알린다.
     if (!storageCorrupt){
       storageCorrupt = true;
       try{
@@ -699,17 +617,18 @@ function writeStore(){
   }
 }
 
-// Apply a change on top of whatever is currently in the store.
-// Returns false when the write failed — callers must not claim success.
 function mutate(fn){
   var fresh = readStore();
-  if (fresh && (fresh.rev || 0) > (S.rev || 0)){
-    // Another tab moved ahead of us. Adopt its state, then apply our change.
-    S = fresh;
-  }
+  if (fresh && (fresh.rev || 0) > (S.rev || 0)) S = fresh;
   fn(S);
   S.rev = (S.rev || 0) + 1;
   return writeStore();
+}
+
+// 상태를 통째로 바꾸는 경로(복원·초기화)도 저장소보다 앞서야 한다.
+function bumpRev(st, prevRev){
+  var cur = readStore();
+  st.rev = Math.max((cur && cur.rev) || 0, prevRev || 0, st.rev || 0) + 1;
 }
 
 function load(){
@@ -747,34 +666,17 @@ function moodOf(v){
   for (var i=0;i<MOODS.length;i++) if (MOODS[i].v === v) return MOODS[i];
   return null;
 }
-function currentSlot(){
-  if (!S.slots.length) return null;
-  for (var i=0;i<S.slots.length;i++) if (S.slots[i].id === ui.slotId) return S.slots[i];
-  ui.slotId = S.slots[0].id;
-  return S.slots[0];
-}
-// A whole-state swap (restore, reset) must still outrank whatever is in the
-// store, or another tab quietly reverts it.
-function bumpRev(st, prevRev){
-  var cur = readStore();
-  st.rev = Math.max((cur && cur.rev) || 0, prevRev || 0, st.rev || 0) + 1;
-}
-function slotIndexOf(slotId){
-  for (var i=0;i<S.slots.length;i++) if (S.slots[i].id === slotId) return i;
-  return -1;
-}
-function slotName(slotId){
-  var i = slotIndexOf(slotId);
-  return i === -1 ? "이전 시간대" : S.slots[i].name;
-}
 function entriesOf(childId){
   return S.entries.filter(function(e){ return e.childId === childId; })
     .sort(function(a,b){
       if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      var ai = slotIndexOf(a.slotId), bi = slotIndexOf(b.slotId);
-      if (ai !== bi) return bi - ai;
       return (b.ts || "") < (a.ts || "") ? -1 : 1;
     });
+}
+function todayCount(childId){
+  var n = 0, t = today();
+  S.entries.forEach(function(e){ if (e.childId === childId && e.date === t) n++; });
+  return n;
 }
 function lastDate(childId){
   var es = entriesOf(childId);
@@ -784,27 +686,55 @@ function sinceDays(childId){
   var d = lastDate(childId);
   return d === null ? null : daysBetween(d, today());
 }
-function entryFor(childId, slotId){
-  var id = today() + "|" + slotId + "|" + childId;
-  for (var i=0;i<S.entries.length;i++) if (S.entries[i].id === id) return S.entries[i];
-  return null;
-}
 function orphanEntries(){
   var known = {};
   S.children.forEach(function(c){ known[c.id] = 1; });
   return S.entries.filter(function(e){ return !known[e.childId]; });
 }
+
+// 조사만 대충 떼어낸다. 완벽할 필요는 없다 — 본인이 쓴 말을 되돌려주는 용도다.
+var STOP = {"오늘":1,"아이":1,"그냥":1,"조금":1,"계속":1,"다시":1,"내내":1,"같이":1,"약간":1,"제일":1,"진짜":1,"너무":1,"아직":1,"먼저":1};
+function stem(w){
+  w = w.replace(/[.,!?~…"'()\[\]·→\-]/g, "");
+  if (w.length < 2) return "";
+  w = w.replace(/(이랑|에서|에게|한테|으로|까지|부터|보다|이가|은는|을를|와과|랑|의|도|만|에|이|가|은|는|을|를|로)$/, "");
+  if (w.length < 2) return "";
+  return w;
+}
+function frequentWords(limit){
+  var tally = {};
+  S.entries.forEach(function(e){
+    var seen = {};
+    e.text.split(/\s+/).forEach(function(raw){
+      var w = stem(raw);
+      if (!w || STOP[w] || seen[w]) return;
+      seen[w] = 1;
+      tally[w] = (tally[w] || 0) + 1;
+    });
+  });
+  return Object.keys(tally)
+    .filter(function(w){ return tally[w] >= 2; })
+    .sort(function(a,b){ return tally[b] - tally[a] || (a < b ? -1 : 1); })
+    .slice(0, limit || 8);
+}
+
+var toastT = null;
+function toast(msg){
+  var el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ el.classList.remove("show"); }, 2400);
+}
+
 // 표정만 바꿔 재사용한다. worry = 놓친 아이가 있을 때, happy = 다 본 날.
 function mascot(mood, extraClass){
   var worry = (mood === "worry");
   var mouth = worry ? "M29.5 45.8 q2.5 -2.2 5 0" : "M29.5 43.6 q2.5 2.8 5 0";
-  // 걱정할 때도 눈은 크게 둔다. 표정은 눈썹과 입으로만 바꾼다.
   var brow = worry
     ? '<path d="M20 29.6 q4 -2.2 7.6 0.6" stroke="#8A6B52" stroke-width="1.9" fill="none" stroke-linecap="round"/>' +
       '<path d="M36.4 30.2 q3.6 -2.8 7.6 -0.6" stroke="#8A6B52" stroke-width="1.9" fill="none" stroke-linecap="round"/>'
     : "";
   return '<svg class="mascot ' + (extraClass || "") + '" viewBox="0 0 64 64" aria-hidden="true" focusable="false">' +
-    // 발과 손을 먼저 그려 몸이 덮게 한다 — 바깥으로 나온 만큼만 보인다.
     '<ellipse cx="25" cy="55.5" rx="5.4" ry="3.5" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
     '<ellipse cx="39" cy="55.5" rx="5.4" ry="3.5" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
     '<circle cx="11.8" cy="43.5" r="3.8" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
@@ -824,14 +754,6 @@ function mascot(mood, extraClass){
     '</svg>';
 }
 
-var toastT = null;
-function toast(msg){
-  var el = document.getElementById("toast");
-  el.textContent = msg; el.classList.add("show");
-  clearTimeout(toastT);
-  toastT = setTimeout(function(){ el.classList.remove("show"); }, 2400);
-}
-
 /* ---------------- header ---------------- */
 function renderTop(){
   var d = new Date();
@@ -843,19 +765,6 @@ function renderTop(){
   S.entries.forEach(function(e){ if (e.date === today()){ n++; uniq[e.childId] = 1; } });
   document.getElementById("countLine").textContent =
     "오늘 " + Object.keys(uniq).length + "명 · " + n + "건";
-
-  var bar = document.getElementById("slotBar");
-  bar.hidden = (ui.tab !== "record");
-  bar.innerHTML = "";
-  if (ui.tab !== "record") return;
-  var cur = currentSlot();
-  S.slots.forEach(function(s){
-    var b = document.createElement("button");
-    b.className = "slot"; b.textContent = s.name;
-    b.setAttribute("aria-pressed", cur && s.id === cur.id ? "true" : "false");
-    b.onclick = function(){ ui.slotId = s.id; render(); };
-    bar.appendChild(b);
-  });
 }
 
 /* ---------------- record tab ---------------- */
@@ -869,7 +778,6 @@ function viewRecord(){
     bn.innerHTML = "<span><b>예시 데이터</b>로 보고 있습니다</span>";
     var b = document.createElement("button");
     b.textContent = "우리 반으로 바꾸기";
-    // 데이터 탭으로 보내는 데서 그치지 않고 붙여넣기 상자까지 펼쳐 준다.
     b.onclick = function(){ ui.tab = "data"; ui.openBulk = true; render(true); };
     bn.appendChild(b);
     v.appendChild(bn);
@@ -886,7 +794,7 @@ function viewRecord(){
     return;
   }
 
-  // gaps — stable ordering so the same children don't get stuck off the list
+  // 오래 못 본 아이. 정렬을 안정적으로 두어 같은 아이만 계속 잘리지 않게 한다.
   var stale = S.children.map(function(c){ return {c:c, s:sinceDays(c.id)}; })
     .filter(function(x){ return x.s === null || x.s >= STALE_DAYS; })
     .sort(function(a,b){
@@ -919,38 +827,26 @@ function viewRecord(){
   }
   v.appendChild(g);
 
-  // grid
   var sec = document.createElement("section");
-  var slot = currentSlot();
-  if (!slot) return;
-  sec.innerHTML = '<div class="sec-head"><span class="sec-title">' + esc(slot.name) +
-    '</span><span class="sec-note">눈에 띈 아이만 눌러주세요</span></div>';
+  sec.innerHTML = '<div class="sec-head"><span class="sec-title">오늘</span>' +
+    '<span class="sec-note">눈에 띈 아이만 눌러주세요</span></div>';
   var grid = document.createElement("div");
   grid.className = "grid";
   S.children.forEach(function(c){
-    var e = entryFor(c.id, slot.id);
+    var n = todayCount(c.id);
     var s = sinceDays(c.id);
     var card = document.createElement("button");
-    card.className = "card" + (e ? " done" : "");
-    var meta;
-    if (e){
-      var m = moodOf(e.mood);
-      var bits = [];
-      if (m) bits.push(m.lb);
-      if (e.tags.length) bits.push(esc(e.tags[0]) + (e.tags.length > 1 ? " +" + (e.tags.length-1) : ""));
-      // No mood recorded means no colour bar — an unrecorded interpretation
-      // must never look like a recorded one.
-      meta = (m ? '<span class="mini-mood" style="background:' + m.c + '"></span>' : '') +
-        '<span>' + (bits.length ? bits.join(" · ") : "기록함") + '</span>';
-    } else {
-      meta = '<span class="since tnum' + (s === null || s >= STALE_DAYS ? " stale" : "") + '">' +
-        (s === null ? "아직 기록 없음" : s === 0 ? "오늘 기록함" : s + "일 전") + '</span>';
-    }
+    card.className = "card" + (n ? " done" : "");
+    // 카드에는 기록 내용을 싣지 않는다. 아이들이 옆에서 화면을 본다.
+    var meta = n
+      ? '<span class="tnum">오늘 ' + n + '건</span>'
+      : '<span class="tnum' + (s === null || s >= STALE_DAYS ? " stale" : "") + '">' +
+        (s === null ? "아직 기록 없음" : s + "일 전") + '</span>';
     card.innerHTML =
       '<div class="card-top"><span class="name">' + esc(c.name) + '</span>' +
-      (e ? '<span class="dot" style="background:var(--accent-strong)"></span>' : '') + '</div>' +
+      (n ? '<span class="dot" style="background:var(--accent-strong)"></span>' : '') + '</div>' +
       '<div class="card-meta">' + meta + '</div>';
-    card.onclick = function(){ openSheet(c, slot); };
+    card.onclick = function(){ openSheet(c, null); };
     grid.appendChild(card);
   });
   sec.appendChild(grid);
@@ -967,8 +863,7 @@ function backupNag(){
     ? "아직 <b>한 번도 백업하지 않았습니다.</b>"
     : "마지막 백업이 <b>" + days + "일 전</b>입니다.") + "</span>";
   var b = document.createElement("button");
-  // One tap from the banner straight into the share sheet — routing through
-  // the data tab first is a step that stops backups from happening.
+  // 배너에서 바로 공유 시트로. 데이터 탭을 거치는 한 단계가 백업을 막는다.
   if (navigator.share){
     b.textContent = "지금 보내기";
     b.onclick = shareCSV;
@@ -981,31 +876,41 @@ function backupNag(){
 }
 
 /* ---------------- sheet ---------------- */
-function openSheet(child, slot){
-  var existing = entryFor(child.id, slot.id);
-  // Pin the date at open time: if midnight passes while the sheet is up,
-  // an edit must stay an edit rather than becoming a new record.
-  ui.editing = {child:child, slot:slot, existing:existing, date:today()};
+function openSheet(child, existing){
+  // 열 때의 날짜를 붙잡아 둔다. 자정을 넘겨도 수정은 수정으로 남아야 한다.
+  ui.editing = {child:child, existing:existing, date: existing ? existing.date : today()};
   ui.draft = existing
-    ? {tags:existing.tags.slice(), mood:(existing.mood === undefined ? null : existing.mood), note:existing.note || ""}
-    : {tags:[], mood:null, note:""};
+    ? {text:existing.text || "", mood:(existing.mood === undefined ? null : existing.mood)}
+    : {text:"", mood:null};
 
   document.getElementById("sheetTitle").textContent = child.name;
   var s = sinceDays(child.id);
-  document.getElementById("sheetSub").textContent =
-    slot.name + " · " + (s === null ? "첫 기록" : s === 0 ? "오늘 기록함" : "마지막 기록 " + s + "일 전");
+  document.getElementById("sheetSub").textContent = existing
+    ? existing.date + " 기록 고치기"
+    : (s === null ? "첫 기록" : s === 0 ? "오늘 이미 기록함" : "마지막 기록 " + s + "일 전");
 
-  var tb = document.getElementById("tagBox");
-  tb.innerHTML = "";
-  var listed = {};
-  S.tags.forEach(function(grp){
-    tb.appendChild(tagGroup(grp.g, grp.items, false));
-    grp.items.forEach(function(t){ listed[t] = 1; });
+  var ni = document.getElementById("noteIn");
+  ni.value = ui.draft.text;
+  ni.oninput = function(){ ui.draft.text = ni.value; syncSave(); };
+
+  // 처음에는 아무것도 안 뜬다. 쓴 말이 쌓여야 생긴다.
+  var words = frequentWords(8);
+  var ww = document.getElementById("wordWrap");
+  var wb = document.getElementById("wordBox");
+  wb.innerHTML = "";
+  ww.hidden = !words.length;
+  words.forEach(function(w){
+    var b = document.createElement("button");
+    b.className = "word"; b.textContent = w;
+    b.onclick = function(){
+      var cur = ni.value;
+      ni.value = cur + (cur && !/\s$/.test(cur) ? " " : "") + w + " ";
+      ui.draft.text = ni.value;
+      ni.focus();
+      syncSave();
+    };
+    wb.appendChild(b);
   });
-  // Tags saved before the list was edited would otherwise be invisible yet
-  // still stored — show them so they can be seen and removed.
-  var retired = ui.draft.tags.filter(function(t){ return !listed[t]; });
-  if (retired.length) tb.appendChild(tagGroup("이전에 쓰던 항목", retired, true));
 
   var mb = document.getElementById("moodBox");
   mb.innerHTML = "";
@@ -1026,10 +931,6 @@ function openSheet(child, slot){
     mb.appendChild(b);
   });
 
-  var ni = document.getElementById("noteIn");
-  ni.value = ui.draft.note;
-  ni.oninput = function(){ ui.draft.note = ni.value; syncSave(); };
-
   document.getElementById("delBtn").hidden = !existing;
   syncSave();
 
@@ -1040,38 +941,15 @@ function openSheet(child, slot){
   document.getElementById("scrim").classList.add("open");
   sheet.classList.add("open");
   document.getElementById("sheetBody").scrollTop = 0;
-  setTimeout(function(){ document.getElementById("sheetClose").focus(); }, 60);
-}
-
-function tagGroup(name, items, retired){
-  var wrap = document.createElement("div");
-  wrap.className = "tag-group";
-  wrap.innerHTML = '<div class="tag-group-name">' + esc(name) + '</div>';
-  var row = document.createElement("div");
-  row.className = "tag-row";
-  items.forEach(function(t){
-    var b = document.createElement("button");
-    b.className = "tag" + (retired ? " retired" : "");
-    b.textContent = t;
-    b.setAttribute("aria-pressed", ui.draft.tags.indexOf(t) !== -1 ? "true" : "false");
-    b.onclick = function(){
-      var i = ui.draft.tags.indexOf(t);
-      if (i === -1) ui.draft.tags.push(t); else ui.draft.tags.splice(i,1);
-      b.setAttribute("aria-pressed", i === -1 ? "true" : "false");
-      syncSave();
-    };
-    row.appendChild(b);
-  });
-  wrap.appendChild(row);
-  return wrap;
+  setTimeout(function(){ try{ ni.focus(); }catch(e){} }, 80);
 }
 
 function syncSave(){
   var d = ui.draft;
-  var ok = d && (d.mood !== null || d.tags.length > 0 || d.note.trim() !== "");
+  var ok = d && (d.text.trim() !== "" || d.mood !== null);
   var b = document.getElementById("saveBtn");
   b.disabled = !ok;
-  b.textContent = !ok ? "하나만 골라주세요"
+  b.textContent = !ok ? "한 줄 적어주세요"
     : (ui.editing && ui.editing.existing ? "수정 저장" : "저장");
 }
 
@@ -1102,21 +980,27 @@ function closeSheet(){
 function commit(){
   var e = ui.editing, d = ui.draft;
   if (!e || !d) return;
-  var childId = e.child.id, slotId = e.slot.id, day = e.date || today();
-  var id = day + "|" + slotId + "|" + childId;
-  var rec = {
-    id:id, date:day, slotId:slotId, childId:childId,
-    tags:d.tags.slice(), mood:d.mood, note:d.note.trim(), ts:new Date().toISOString()
-  };
   var name = e.child.name;
+  var existingId = e.existing ? e.existing.id : null;
+  var rec = {
+    id: existingId || uid(),
+    date: e.date,
+    childId: e.child.id,
+    text: d.text.trim(),
+    mood: d.mood,
+    mark: e.existing ? e.existing.mark : null,
+    ts: new Date().toISOString()
+  };
   var ok = mutate(function(st){
     var idx = -1;
-    for (var i=0;i<st.entries.length;i++) if (st.entries[i].id === id) idx = i;
+    if (existingId){
+      for (var i=0;i<st.entries.length;i++) if (st.entries[i].id === existingId) idx = i;
+    }
     if (idx === -1) st.entries.push(rec); else st.entries[idx] = rec;
     st.demo = false;
   });
   closeSheet(); render();
-  // Never claim a save that did not happen.
+  // 일어나지 않은 저장을 성공이라 말하지 않는다.
   if (ok) toast(name + " 기록됨");
   else toast("저장되지 않았습니다 — 위 경고를 확인하세요");
 }
@@ -1133,7 +1017,7 @@ function removeEntry(){
   toast(ok ? "삭제했습니다" : "저장되지 않았습니다 — 위 경고를 확인하세요");
 }
 
-/* ---------------- child tab ---------------- */
+/* ---------------- consult tab ---------------- */
 function viewChild(){
   var v = document.getElementById("view");
   v.innerHTML = "";
@@ -1160,9 +1044,8 @@ function viewChild(){
   v.appendChild(pk);
 
   var child = S.children.filter(function(c){ return c.id === ui.pick; })[0];
-  var es = entriesOf(child.id);
 
-  // The picker scrolls back to 0 on every render, so name the child in the page.
+  // 피커는 매번 처음으로 되감기므로, 지금 보는 아이 이름을 본문에도 적는다.
   var h = document.createElement("div");
   h.className = "child-name";
   h.textContent = child.name;
@@ -1173,109 +1056,150 @@ function viewChild(){
     }, 0);
   }
 
-  var stat = document.createElement("div");
-  stat.className = "stat-row";
-  var s = sinceDays(child.id);
-  stat.innerHTML =
-    '<div class="stat"><div class="v mono">' + es.length + '</div><div class="k">기록 수</div></div>' +
-    '<div class="stat"><div class="v tnum">' + (s === null ? "—" : s === 0 ? "오늘" : s + "일 전") +
-      '</div><div class="k">마지막 기록</div></div>';
-  v.appendChild(stat);
+  var rs = document.createElement("div");
+  rs.className = "ranges";
+  RANGES.forEach(function(r){
+    var b = document.createElement("button");
+    b.className = "range"; b.textContent = r.lb;
+    b.setAttribute("aria-pressed", ui.range === r.k ? "true" : "false");
+    b.onclick = function(){ ui.range = r.k; render(); };
+    rs.appendChild(b);
+  });
+  v.appendChild(rs);
 
-  if (!es.length){
+  var all = entriesOf(child.id);
+  var cutDays = 0;
+  RANGES.forEach(function(r){ if (r.k === ui.range) cutDays = r.days; });
+  var inRange = cutDays === 0 ? all : all.filter(function(e){
+    return daysBetween(e.date, today()) <= cutDays;
+  });
+
+  var goods = inRange.filter(function(e){ return e.mark === "good"; }).length;
+  var watches = inRange.filter(function(e){ return e.mark === "watch"; }).length;
+
+  var tally = document.createElement("div");
+  tally.className = "tally";
+  tally.innerHTML =
+    '<span class="tally-item"><b class="tnum">' + inRange.length + '</b>건</span>' +
+    '<span class="tally-item good"><b class="tnum">' + goods + '</b>칭찬할 것</span>' +
+    '<span class="tally-item watch"><b class="tnum">' + watches + '</b>지켜볼 것</span>';
+  v.appendChild(tally);
+
+  if (!inRange.length){
     var em = document.createElement("div");
     em.className = "empty";
-    em.innerHTML = mascot("happy") + esc(child.name) + " 기록이 아직 없습니다.<br>기록 탭에서 눌러 남겨보세요.";
+    em.innerHTML = mascot("happy") + esc(child.name) + " 기록이 이 기간에 없습니다.<br>기록 탭에서 남겨보세요.";
     v.appendChild(em);
     return;
   }
 
-  // mood distribution — ordinal, one bar per step, labelled directly
-  var counts = MOODS.map(function(m){
-    return es.filter(function(e){ return e.mood === m.v; }).length;
-  });
-  var moodTotal = counts.reduce(function(a,b){ return a+b; }, 0);
-  var max = Math.max.apply(null, counts) || 1;
-  var ds = document.createElement("section");
-  var dh = '<div class="sec-head"><span class="sec-title">상태 분포</span>' +
-    '<span class="sec-note">상태를 남긴 기록 ' + moodTotal + '건' +
-    (moodTotal < es.length ? ' · 나머지 ' + (es.length - moodTotal) + '건은 상태 없음' : '') +
-    '</span></div><div class="dist">';
-  MOODS.forEach(function(m, i){
-    var hgt = Math.round(counts[i] / max * 46) + 3;
-    dh += '<div class="dist-col">' +
-      '<span class="dist-n mono">' + (counts[i] || "") + '</span>' +
-      '<span class="dist-bar" style="height:' + hgt + 'px;background:' + m.c + '"></span>' +
-      '<span class="dist-lb">' + m.em + '</span></div>';
-  });
-  dh += '</div><div class="dist-cap">';
-  MOODS.forEach(function(m){ dh += '<span>' + m.lb + '</span>'; });
-  ds.innerHTML = dh + "</div>";
-  v.appendChild(ds);
+  // 토글은 칠한 것이 없어도 늘 보여야 한다. 안 그러면 필터를 켠 채 다른
+  // 아이로 넘어갔을 때 빈 화면만 남고 끌 방법이 사라진다.
+  var ot = document.createElement("div");
+  ot.className = "only-toggle";
+  ot.innerHTML = '<span>통화할 때는 칠한 것만 보세요</span>';
+  var tb = document.createElement("button");
+  tb.textContent = ui.onlyMarked ? "칠한 것만" : "전체 보기";
+  tb.setAttribute("aria-pressed", ui.onlyMarked ? "true" : "false");
+  tb.onclick = function(){ ui.onlyMarked = !ui.onlyMarked; render(); };
+  ot.appendChild(tb);
+  v.appendChild(ot);
 
-  // tag frequency
-  var tally = {};
-  es.forEach(function(e){ e.tags.forEach(function(t){ tally[t] = (tally[t]||0)+1; }); });
-  var keys = Object.keys(tally).sort(function(a,b){ return tally[b]-tally[a]; }).slice(0,6);
-  if (keys.length){
-    var fs = document.createElement("section");
-    var fmax = tally[keys[0]];
-    var fh = '<div class="sec-head"><span class="sec-title">자주 붙은 관찰</span></div><div class="freq">';
-    keys.forEach(function(k){
-      fh += '<div class="freq-row"><span class="freq-label">' + esc(k) + '</span>' +
-        '<span class="freq-n mono">' + tally[k] + '</span>' +
-        '<span class="freq-track"><span class="freq-fill" style="width:' +
-        Math.round(tally[k]/fmax*100) + '%"></span></span></div>';
+  var list = ui.onlyMarked ? inRange.filter(function(e){ return e.mark; }) : inRange;
+
+  if (ui.onlyMarked && !list.length){
+    var none = document.createElement("div");
+    none.className = "empty";
+    none.innerHTML = esc(child.name) + " 기록 중 칠한 것이 아직 없습니다.<br>" +
+      "전체 보기로 바꿔 읽으면서 칠해보세요.";
+    v.appendChild(none);
+    return;
+  }
+  // 칠한 것만 볼 때는 상담이 흘러가는 순서대로 — 칭찬 먼저, 지켜볼 것 나중에.
+  if (ui.onlyMarked){
+    list = list.slice().sort(function(a,b){
+      if (a.mark !== b.mark) return a.mark === "good" ? -1 : 1;
+      return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
     });
-    fs.innerHTML = fh + "</div>";
-    v.appendChild(fs);
   }
 
-  // log
-  var ls = document.createElement("section");
-  var lh = '<div class="sec-head"><span class="sec-title">기록</span></div><div class="log">';
-  es.slice(0,25).forEach(function(e){
-    var m = moodOf(e.mood);
-    var dt = e.date.slice(5).replace("-",".");
-    lh += '<div class="log-item"><div class="log-when"><b class="mono">' + dt + '</b>' +
-      esc(slotName(e.slotId)) + '</div><div class="log-body">';
-    if (m) lh += '<span class="log-mood"><span class="mini-mood" style="background:' + m.c + '"></span>' + m.lb + '</span>';
-    if (e.tags.length){
-      lh += '<span class="log-tags">';
-      e.tags.forEach(function(t){ lh += '<span class="log-tag">' + esc(t) + '</span>'; });
-      lh += '</span>';
-    }
-    if (e.note) lh += '<span class="log-note">' + esc(e.note) + '</span>';
-    lh += '</div></div>';
+  var wrap = document.createElement("section");
+  wrap.className = "entries";
+  list.forEach(function(e){ wrap.appendChild(entryCard(e, child)); });
+  v.appendChild(wrap);
+
+  var words = frequentWords(8);
+  if (words.length){
+    var fw = document.createElement("section");
+    var fh = '<div class="sec-head"><span class="sec-title">자주 쓰신 말</span>' +
+      '<span class="sec-note">반 전체 기준</span></div><div class="words">';
+    words.forEach(function(w){ fh += '<span class="word">' + esc(w) + '</span>'; });
+    fw.innerHTML = fh + '</div>';
+    v.appendChild(fw);
+  }
+}
+
+function entryCard(e, child){
+  var el = document.createElement("div");
+  el.className = "entry" + (e.mark ? " " + e.mark : "");
+  var m = moodOf(e.mood);
+  var dt = e.date.slice(5).replace("-", ".");
+  var top = '<div class="entry-top"><span class="entry-date mono">' + dt + '</span>' +
+    (m ? '<span class="entry-mood">' + m.em + ' ' + m.lb + '</span>' : '') + '</div>';
+  var body = e.text ? '<div class="entry-text">' + esc(e.text) + '</div>' : '';
+  el.innerHTML = top + body;
+
+  var acts = document.createElement("div");
+  acts.className = "entry-acts";
+  [["good","칭찬할 것"],["watch","지켜볼 것"]].forEach(function(pair){
+    var b = document.createElement("button");
+    b.className = "mark-btn " + pair[0];
+    b.textContent = pair[1];
+    b.setAttribute("aria-pressed", e.mark === pair[0] ? "true" : "false");
+    b.onclick = function(){
+      var next = (e.mark === pair[0]) ? null : pair[0];
+      var ok = mutate(function(st){
+        st.entries.forEach(function(x){ if (x.id === e.id) x.mark = next; });
+      });
+      render();
+      if (!ok) toast("저장되지 않았습니다");
+    };
+    acts.appendChild(b);
   });
-  ls.innerHTML = lh + "</div>";
-  v.appendChild(ls);
+  var ed = document.createElement("button");
+  ed.className = "entry-edit";
+  ed.textContent = "고치기";
+  ed.onclick = function(){ openSheet(child, e); };
+  acts.appendChild(ed);
+  el.appendChild(acts);
+  return el;
 }
 
 /* ---------------- export / import ---------------- */
 function csvCell(x){
   x = String(x === null || x === undefined ? "" : x);
-  // A leading =, +, - or @ makes a spreadsheet treat the note as a formula.
-  // Plain numbers are exempt, or the mood column turns -1 and -2 into text
-  // and every average silently drops the withdrawn end of the scale.
+  // 앞머리의 =, +, -, @ 는 스프레드시트가 수식으로 읽는다. 순수 숫자는 예외로
+  // 둬야 상태값 -1, -2 가 글자로 바뀌지 않는다.
   if (/^[=+\-@]/.test(x) && !/^-?\d+(\.\d+)?$/.test(x)) x = "'" + x;
   return /[",\r\n]/.test(x) ? '"' + x.replace(/"/g,'""') + '"' : x;
 }
 function toCSV(){
   var names = {};
   S.children.forEach(function(c){ names[c.id] = c.name; });
-  var rows = [["date","slot","child","child_id","tags","mood","mood_label","note"].join(",")];
+  var MARKLB = {good:"칭찬할 것", watch:"지켜볼 것"};
+  var rows = [["date","child","child_id","text","mood","mood_label","mark"].join(",")];
   S.entries.slice().sort(function(a,b){
     if (a.date !== b.date) return a.date < b.date ? -1 : 1;
-    return slotIndexOf(a.slotId) - slotIndexOf(b.slotId);
+    return (a.ts || "") < (b.ts || "") ? -1 : 1;
   }).forEach(function(e){
     var m = moodOf(e.mood);
     rows.push([
-      csvCell(e.date), csvCell(slotName(e.slotId)),
+      csvCell(e.date),
       csvCell(names[e.childId] || "(명단에 없음)"), csvCell(e.childId),
-      csvCell(e.tags.join("; ")),
+      csvCell(e.text),
       csvCell(e.mood === null || e.mood === undefined ? "" : e.mood),
-      csvCell(m ? m.lb : ""), csvCell(e.note)
+      csvCell(m ? m.lb : ""),
+      csvCell(e.mark ? MARKLB[e.mark] : "")
     ].join(","));
   });
   return rows.join("\r\n");
@@ -1294,11 +1218,10 @@ function copyText(text, label){
     toast("아래 칸에서 직접 복사하세요");
   }
 }
-// iOS share sheet: two taps to hand the backup to KakaoTalk.
+// iOS 공유 시트: 두 번 눌러 카톡으로 백업이 넘어간다.
 function shareCSV(){
   var body = toCSV();
-  // BOM so Excel opens the Korean columns correctly; ASCII filename so the
-  // receiving app never has to guess at the encoding of the name itself.
+  // 엑셀이 한글 열을 제대로 열도록 BOM을, 파일명은 받는 앱이 헷갈리지 않도록 영문으로.
   var csv = "﻿" + body;
   var name = "haru3-" + today() + ".csv";
   var done = function(){ markExported(); render(); toast("보냈으면 백업 완료입니다"); };
@@ -1309,8 +1232,7 @@ function shareCSV(){
       return;
     }
   }catch(e){}
-  // Sending the whole CSV as a chat message risks truncation, so only fall
-  // back to text while it is short.
+  // 전체 CSV를 채팅 본문으로 보내면 잘릴 수 있어 짧을 때만 텍스트로 넘긴다.
   if (navigator.share && body.length < 4000){
     navigator.share({title:name, text:body}).then(done, function(){});
     return;
@@ -1354,8 +1276,8 @@ function viewData(){
   out.placeholder = "복사 버튼을 누르면 여기에도 내용이 나옵니다.";
   out.onclick = function(){ out.select(); };
   p1.appendChild(out);
-  // Copying to the clipboard is not the same as having backed up, and a
-  // clipboard write that fails would otherwise leave the nag on forever.
+  // 클립보드에 담긴 것과 백업한 것은 다르다. 복사가 실패해도 잔소리가 영영
+  // 안 꺼지는 일이 없도록 직접 표시할 길을 둔다.
   var mr = document.createElement("div"); mr.className = "row-btns";
   var manual = document.createElement("button");
   manual.className = "btn-sm";
@@ -1365,13 +1287,12 @@ function viewData(){
   p1.appendChild(mr);
   v.appendChild(p1);
 
-  // restore
   var p0 = document.createElement("section");
   p0.className = "panel";
   p0.innerHTML = "<h3>복원</h3><p>백업해 둔 <b>JSON</b>을 붙여넣으면 그 시점으로 되돌립니다. " +
     "지금 기록은 모두 대체됩니다.</p>";
   var imp = document.createElement("textarea");
-  imp.className = "out"; imp.placeholder = '{"v":2,"children":[...';
+  imp.className = "out"; imp.placeholder = '{"v":3,"children":[...';
   p0.appendChild(imp);
   var r0 = document.createElement("div"); r0.className = "row-btns";
   var b0 = document.createElement("button");
@@ -1385,14 +1306,14 @@ function viewData(){
     if (!parsed){ toast("이 앱의 백업 형식이 아닙니다"); return; }
     if (!confirm("아이 " + parsed.children.length + "명, 기록 " + parsed.entries.length +
       "건으로 되돌립니다.\n지금 기록 " + S.entries.length + "건은 사라집니다. 계속할까요?")) return;
-    // Draw first, save only if drawing worked. Saving a state the app cannot
-    // render leaves a blank app that survives a reload.
-    var prev = S, prevTab = ui.tab, prevSlot = ui.slotId, prevPick = ui.pick;
-    S = parsed; ui.tab = "record"; ui.slotId = null; ui.pick = null;
+    // 저장보다 렌더를 먼저 시도한다. 그리지 못하는 상태를 저장해 버리면
+    // 새로고침해도 백지인 앱이 남는다.
+    var prev = S, prevTab = ui.tab, prevPick = ui.pick;
+    S = parsed; ui.tab = "record"; ui.pick = null;
     try{
       render(true);
     }catch(err){
-      S = prev; ui.tab = prevTab; ui.slotId = prevSlot; ui.pick = prevPick;
+      S = prev; ui.tab = prevTab; ui.pick = prevPick;
       render(true);
       toast("이 백업은 열 수 없습니다. 복사한 내용을 다시 확인해 주세요");
       return;
@@ -1442,7 +1363,7 @@ function viewData(){
     }
   }));
 
-  // orphan cleanup — covers the demo records that survive a first save
+  // 명단 교체 뒤 남은 예시 기록을 짚어 준다.
   var orphans = orphanEntries();
   if (orphans.length){
     var po = document.createElement("section");
@@ -1467,78 +1388,11 @@ function viewData(){
     v.appendChild(po);
   }
 
-  v.appendChild(rowEditor({
-    title:"기록하는 시간대",
-    desc:"쉬는 시간에 있었던 일을 바로 다음 수업 시간에 남기는 리듬입니다. 이름을 고쳐도 기존 기록은 그대로 붙어 있습니다.",
-    list:S.slots,
-    addLabel:"+ 시간대 추가",
-    placeholder:"시간대 이름",
-    countOf:function(s){ return S.entries.filter(function(e){ return e.slotId === s.id; }).length; },
-    onDelete:function(s, n){
-      return confirm(s.name + " 시간대를 지웁니다." +
-        (n ? "\n이 시간대의 기록 " + n + "건도 함께 사라집니다." : "") + "\n계속할까요?");
-    },
-    remove:function(st, id){
-      st.slots = st.slots.filter(function(x){ return x.id !== id; });
-      st.entries = st.entries.filter(function(e){ return e.slotId !== id; });
-    },
-    add:function(st, name){ st.slots.push({id:uid(), name:name}); },
-    rename:function(st, id, name){
-      st.slots.forEach(function(s){ if (s.id === id) s.name = name; });
-    },
-    bulkApply:function(st, names){
-      var byName = {}, used = {};
-      st.slots.forEach(function(s){ if (!(s.name in byName)) byName[s.name] = s; });
-      var next = names.map(function(n){
-        var hit = byName[n];
-        if (hit && !used[hit.id]){ used[hit.id] = 1; return hit; }
-        return {id:uid(), name:n};
-      });
-      var keep = {};
-      next.forEach(function(s){ keep[s.id] = 1; });
-      st.slots = next;
-      st.entries = st.entries.filter(function(e){ return keep[e.slotId]; });
-    },
-    minOne:true
-  }));
-
-  // tags editor
-  var p4 = document.createElement("section");
-  p4.className = "panel";
-  p4.innerHTML = "<h3>관찰 항목</h3><p><b>#</b>로 시작하면 묶음 이름, 나머지는 항목입니다. " +
-    "실제로 반복해서 벌어지는 일로 바꿔주세요. 이미 남긴 기록의 항목은 그대로 유지됩니다.</p>";
-  var tg = document.createElement("textarea");
-  tg.className = "edit-area"; tg.style.minHeight = "200px";
-  tg.value = S.tags.map(function(g){
-    return "# " + g.g + "\n" + g.items.join("\n");
-  }).join("\n\n");
-  p4.appendChild(tg);
-  var r4 = document.createElement("div"); r4.className = "row-btns";
-  var sb4 = document.createElement("button");
-  sb4.className = "btn-sm primary"; sb4.textContent = "항목 저장";
-  sb4.onclick = function(){
-    var groups = [], cur = null;
-    tg.value.split("\n").forEach(function(line){
-      var t = line.trim();
-      if (!t) return;
-      if (t.charAt(0) === "#"){ cur = {g:t.replace(/^#+\s*/,""), items:[]}; groups.push(cur); }
-      else { if (!cur){ cur = {g:"관찰", items:[]}; groups.push(cur); } cur.items.push(t); }
-    });
-    groups = groups.filter(function(g){ return g.items.length; });
-    if (!groups.length){ toast("항목을 하나 이상 넣어주세요"); return; }
-    var ok = mutate(function(st){ st.tags = groups; });
-    render(); toast(ok ? "관찰 항목을 저장했습니다" : "저장되지 않았습니다");
-  };
-  r4.appendChild(sb4);
-  p4.appendChild(r4);
-  v.appendChild(p4);
-
-  // theme
   var pt = document.createElement("section");
   pt.className = "panel";
   pt.innerHTML = "<h3>화면 테마</h3><p>색과 글꼴만 바뀝니다. 기록과 데이터는 그대로입니다.</p>";
   var rt = document.createElement("div"); rt.className = "row-btns";
-  [["plain","기본"],["cute","말랑말랑"]].forEach(function(pair){
+  [["cute","말랑말랑"],["plain","기본"]].forEach(function(pair){
     var tb = document.createElement("button");
     tb.className = "btn-sm" + (S.skin === pair[0] ? " primary" : "");
     tb.textContent = pair[1];
@@ -1554,7 +1408,6 @@ function viewData(){
   pt.appendChild(rt);
   v.appendChild(pt);
 
-  // reset
   var p5 = document.createElement("section");
   p5.className = "panel";
   p5.innerHTML = "<h3>초기화</h3><p>지우기 전에 반드시 위에서 백업하세요. 되돌릴 수 없습니다.</p>";
@@ -1564,10 +1417,11 @@ function viewData(){
   d1.onclick = function(){
     if (!confirm("지금 기록을 모두 버리고 예시 데이터로 되돌립니다. 계속할까요?")) return;
     var fresh = demoState();
+    fresh.skin = S.skin;
     bumpRev(fresh, S.rev);
     S = fresh;
     var ok = writeStore();
-    ui.tab = "record"; ui.slotId = null; ui.pick = null;
+    ui.tab = "record"; ui.pick = null;
     render(true); toast(ok ? "예시 데이터로 되돌렸습니다" : "저장되지 않았습니다");
   };
   var d2 = document.createElement("button");
@@ -1582,12 +1436,13 @@ function viewData(){
   v.appendChild(p5);
 }
 
-// Row-at-a-time editor: renaming keeps the row's id, so records never lose
-// the thing they point at. A textarea of names could not do that.
+// 행 단위 편집기: 이름을 고쳐도 그 행의 id가 유지되므로 기록이 가리키던
+// 대상을 잃지 않는다. 이름 목록 textarea로는 할 수 없던 일이다.
 function rowEditor(cfg){
   var p = document.createElement("section");
   p.className = "panel";
   p.innerHTML = "<h3>" + esc(cfg.title) + "</h3><p>" + cfg.desc + "</p>";
+
   if (cfg.groupEdit){
     var gl = document.createElement("div");
     gl.className = "field-label";
@@ -1617,8 +1472,7 @@ function rowEditor(cfg){
     inp.onchange = function(){
       var name = inp.value.trim();
       if (!name){ inp.value = item.name; toast("이름을 비울 수 없습니다"); return; }
-      // Same-name children are common in a class; allow it, but say so —
-      // nothing on the cards or the picker distinguishes them.
+      // 한 반에 동명이인은 흔하다. 막지 않되 알려는 준다.
       if (name !== item.name && cfg.list.some(function(it){ return it.id !== item.id && it.name === name; })){
         toast("같은 이름이 이미 있어요");
       }
@@ -1630,7 +1484,6 @@ function rowEditor(cfg){
     del.className = "row-del"; del.textContent = "×";
     del.setAttribute("aria-label", item.name + " 지우기");
     del.onclick = function(){
-      if (cfg.minOne && cfg.list.length <= 1){ toast("하나는 남겨야 합니다"); return; }
       var n = cfg.countOf(item);
       if (!cfg.onDelete(item, n)) return;
       var ok = mutate(function(st){ cfg.remove(st, item.id); });
@@ -1650,14 +1503,13 @@ function rowEditor(cfg){
     if (name === null) return;
     name = name.trim();
     if (!name) return;
-    if (nameTaken(name)) toast("같은 이름이 이미 있어요");
+    if (cfg.list.some(function(it){ return it.name === name; })) toast("같은 이름이 이미 있어요");
     var ok = mutate(function(st){ cfg.add(st, name); });
     render(); toast(ok ? "추가했습니다" : "저장되지 않았습니다");
   };
   addRow.appendChild(add);
 
-  // Setting up a class one prompt() at a time is 25+ modal taps — the first
-  // five minutes of the pilot, and the place it would stall.
+  // 한 명씩 prompt로 반을 만들면 모달을 25번 넘게 눌러야 한다.
   if (cfg.bulkApply){
     var bulkBtn = document.createElement("button");
     bulkBtn.className = "row-add"; bulkBtn.textContent = "여러 개 한 번에";
@@ -1684,13 +1536,13 @@ function rowEditor(cfg){
       names.forEach(function(n){ keptNames[n] = 1; });
       var dropped = cfg.list.filter(function(it){ return !keptNames[it.name]; });
       var lostRecords = dropped.reduce(function(sum, it){ return sum + cfg.countOf(it); }, 0);
-      var msg = cfg.title + "을(를) " + names.length + "개로 바꿉니다.";
-      if (dropped.length) msg += "\n빠지는 " + dropped.length + "개" +
-        (lostRecords ? "의 기록 " + lostRecords + "건도 함께 사라집니다." : " 는 기록이 없습니다.");
+      var msg = cfg.title + "을(를) " + names.length + "명으로 바꿉니다.";
+      if (dropped.length) msg += "\n빠지는 " + dropped.length + "명" +
+        (lostRecords ? "의 기록 " + lostRecords + "건도 함께 사라집니다." : " 은(는) 기록이 없습니다.");
       msg += "\n계속할까요?";
       if (!confirm(msg)) return;
       var ok = mutate(function(st){ cfg.bulkApply(st, names); });
-      ui.slotId = null; ui.pick = null;
+      ui.pick = null;
       render(); toast(ok ? "목록을 바꿨습니다" : "저장되지 않았습니다");
     };
     box.appendChild(warn); box.appendChild(ta); box.appendChild(apply);
@@ -1712,10 +1564,6 @@ function rowEditor(cfg){
 
   p.appendChild(addRow);
   return p;
-
-  function nameTaken(name){
-    return cfg.list.some(function(it){ return it.name === name; });
-  }
 }
 
 /* ---------------- routing ---------------- */
@@ -1731,8 +1579,8 @@ function render(resetScroll){
     if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page");
     else b.removeAttribute("aria-current");
   });
-  // Only jump to the top when the tab changes — saving a record in the lower
-  // half of the list must not throw the list back to the start.
+  // 탭이 바뀔 때만 맨 위로. 목록 아래쪽 아이를 기록하고 나서 목록이 처음으로
+  // 되감기면 연달아 남기는 리듬이 끊긴다.
   if (resetScroll) window.scrollTo(0,0);
 }
 
@@ -1753,7 +1601,7 @@ document.addEventListener("keydown", function(e){
   if (!sheet.classList.contains("open")) return;
   if (e.key === "Escape"){ closeSheet(); return; }
   if (e.key !== "Tab") return;
-  // Keep Tab inside the open sheet.
+  // 열린 시트 안에 Tab을 가둔다.
   var f = sheet.querySelectorAll("button, textarea, input, [tabindex]");
   var list = Array.prototype.filter.call(f, function(el){ return !el.disabled && el.offsetParent !== null; });
   if (!list.length) return;
@@ -1762,21 +1610,20 @@ document.addEventListener("keydown", function(e){
   else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
 });
 
-// Another tab wrote: adopt it rather than letting this tab overwrite it later.
+// 다른 탭이 저장했다면 그것을 받아들인다. 나중에 이 탭이 덮어쓰지 않도록.
 window.addEventListener("storage", function(e){
   if (e.key !== KEY) return;
   var fresh = readStore();
   if (fresh && (fresh.rev || 0) > (S.rev || 0)){
     S = fresh;
-    // Don't redraw over a sheet in progress, or over the data tab where
-    // someone may be part-way through typing a name or pasting a backup.
+    // 작성 중인 시트나 입력 중인 데이터 탭 위에 다시 그리지 않는다.
     if (document.getElementById("sheet").classList.contains("open")) return;
     if (ui.tab === "data") return;
     render();
   }
 });
 
-// The date can roll over while the app sits open on a home-screen icon.
+// 홈 화면 아이콘으로 열어둔 채 날짜가 바뀔 수 있다.
 function checkDay(){
   if (lastRenderedDay && today() !== lastRenderedDay) render();
 }
@@ -1784,15 +1631,15 @@ document.addEventListener("visibilitychange", function(){ if (!document.hidden) 
 window.addEventListener("pageshow", checkDay);
 setInterval(checkDay, 60000);
 
-// Offline shell. Present only in the self-hosted build; the registration
-// simply fails and is ignored anywhere sw.js is not served.
+// 오프라인 껍데기. 자체 호스팅 빌드에만 sw.js가 있고, 없는 곳에서는 등록이
+// 실패한 뒤 그대로 무시된다.
 if ("serviceWorker" in navigator){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   });
 }
 
-// 명단을 링크로 심는다: .../haru3/#names=LEO,JOSEPH,...
+// 명단을 링크로 심는다: .../haru3/#class=라임 반&names=LEO,JOSEPH,...
 // 아이 실명을 공개 저장소 코드에 넣지 않기 위한 것이다. 해시는 서버로
 // 전송되지 않으므로 이름은 링크를 받은 사람의 기기 밖으로 나가지 않는다.
 function groupFromHash(){
