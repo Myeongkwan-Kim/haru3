@@ -155,6 +155,16 @@
 :root[data-skin="cute"] .sheet{border-radius:26px 26px 0 0}
 :root[data-skin="cute"] .gaps{border-radius:4px 16px 16px 4px}
 :root[data-skin="cute"] .banner{border-radius:16px}
+/* 마스코트: 특정 작품의 캐릭터가 아니라 이 앱을 위해 그린 도형이다.
+   말랑말랑 테마에서만 나타나고 기본 테마는 차분하게 둔다. */
+.mascot{display:none}
+:root[data-skin="cute"] .mascot{display:block;flex:0 0 auto;width:52px;height:52px}
+:root[data-skin="cute"] .gaps{display:flex;gap:10px;align-items:flex-start}
+:root[data-skin="cute"] .gaps-body{flex:1;min-width:0}
+:root[data-skin="cute"] .empty .mascot{width:84px;height:84px;margin:0 auto 12px}
+:root[data-skin="cute"] .mascot-wave{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion: reduce){:root[data-skin="cute"] .mascot-wave{animation:none}}
 
 *{box-sizing:border-box}
 body{
@@ -783,6 +793,36 @@ function orphanEntries(){
   S.children.forEach(function(c){ known[c.id] = 1; });
   return S.entries.filter(function(e){ return !known[e.childId]; });
 }
+// 표정만 바꿔 재사용한다. worry = 놓친 아이가 있을 때, happy = 다 본 날.
+function mascot(mood, extraClass){
+  var worry = (mood === "worry");
+  var mouth = worry ? "M29.5 45.8 q2.5 -2.2 5 0" : "M29.5 43.6 q2.5 2.8 5 0";
+  // 걱정할 때도 눈은 크게 둔다. 표정은 눈썹과 입으로만 바꾼다.
+  var brow = worry
+    ? '<path d="M20 29.6 q4 -2.2 7.6 0.6" stroke="#8A6B52" stroke-width="1.9" fill="none" stroke-linecap="round"/>' +
+      '<path d="M36.4 30.2 q3.6 -2.8 7.6 -0.6" stroke="#8A6B52" stroke-width="1.9" fill="none" stroke-linecap="round"/>'
+    : "";
+  return '<svg class="mascot ' + (extraClass || "") + '" viewBox="0 0 64 64" aria-hidden="true" focusable="false">' +
+    // 발과 손을 먼저 그려 몸이 덮게 한다 — 바깥으로 나온 만큼만 보인다.
+    '<ellipse cx="25" cy="55.5" rx="5.4" ry="3.5" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
+    '<ellipse cx="39" cy="55.5" rx="5.4" ry="3.5" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
+    '<circle cx="11.8" cy="43.5" r="3.8" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
+    '<circle cx="52.2" cy="43.5" r="3.8" fill="#FFF6EC" stroke="#A87F62" stroke-width="2"/>' +
+    '<path d="M32 20 C32 12, 27 8.5, 23.5 11 C20 13.5, 25.5 20, 32 20 Z" fill="#A9D49B"/>' +
+    '<path d="M32 20 C32 13, 37 9.5, 40.5 12 C44 14.5, 38.5 20, 32 20 Z" fill="#86BE7C"/>' +
+    '<line x1="32" y1="18" x2="32" y2="24" stroke="#86BE7C" stroke-width="2.4" stroke-linecap="round"/>' +
+    '<ellipse cx="32" cy="37" rx="20.5" ry="17.5" fill="#FFF6EC" stroke="#A87F62" stroke-width="2.3"/>' +
+    brow +
+    '<circle cx="24.3" cy="36" r="4.4" fill="#4A3529"/>' +
+    '<circle cx="25.9" cy="34.3" r="1.6" fill="#FFFFFF"/>' +
+    '<circle cx="39.7" cy="36" r="4.4" fill="#4A3529"/>' +
+    '<circle cx="41.3" cy="34.3" r="1.6" fill="#FFFFFF"/>' +
+    '<ellipse cx="15.8" cy="42.2" rx="4.4" ry="3.3" fill="#FF9AA0" opacity=".95"/>' +
+    '<ellipse cx="48.2" cy="42.2" rx="4.4" ry="3.3" fill="#FF9AA0" opacity=".95"/>' +
+    '<path d="' + mouth + '" stroke="#4A3529" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+    '</svg>';
+}
+
 var toastT = null;
 function toast(msg){
   var el = document.getElementById("toast");
@@ -840,7 +880,7 @@ function viewRecord(){
   if (!S.children.length){
     var em = document.createElement("div");
     em.className = "empty";
-    em.innerHTML = "아직 아이가 등록되지 않았습니다.<br>데이터 탭에서 이름을 넣어주세요.";
+    em.innerHTML = mascot("happy") + "아직 아이가 등록되지 않았습니다.<br>데이터 탭에서 이름을 넣어주세요.";
     v.appendChild(em);
     return;
   }
@@ -869,10 +909,12 @@ function viewRecord(){
     if (stale.length > shown.length){
       html += '<span class="gap-more tnum">외 ' + (stale.length - shown.length) + '명</span>';
     }
-    g.innerHTML = html + "</div>";
+    g.innerHTML = '<div class="gaps-body">' + html + '</div></div>' + mascot("worry");
   } else {
-    g.innerHTML = '<div class="sec-head"><span class="sec-title">놓치고 있는 아이</span></div>' +
-      '<div class="gaps-clear">최근 ' + STALE_DAYS + '일 안에 모든 아이를 한 번씩 봤습니다.</div>';
+    g.innerHTML = '<div class="gaps-body">' +
+      '<div class="sec-head"><span class="sec-title">놓치고 있는 아이</span></div>' +
+      '<div class="gaps-clear">최근 ' + STALE_DAYS + '일 안에 모든 아이를 한 번씩 봤습니다.</div>' +
+      '</div>' + mascot("happy", "mascot-wave");
   }
   v.appendChild(g);
 
@@ -1142,7 +1184,7 @@ function viewChild(){
   if (!es.length){
     var em = document.createElement("div");
     em.className = "empty";
-    em.innerHTML = esc(child.name) + " 기록이 아직 없습니다.<br>기록 탭에서 눌러 남겨보세요.";
+    em.innerHTML = mascot("happy") + esc(child.name) + " 기록이 아직 없습니다.<br>기록 탭에서 눌러 남겨보세요.";
     v.appendChild(em);
     return;
   }
