@@ -1,7 +1,7 @@
 <title>하루 세 아이</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Jua&display=swap">
 <style>
 :root{
   --ground:#FCFCFB;
@@ -15,6 +15,7 @@
   --accent:#2F6B5C;
   --accent-ink:#FFFFFF;
   --accent-soft:#E6F0EC;
+  --accent-strong:#2F6B5C;
   --warn:#8C5411;
   --warn-soft:#FBF0E1;
   --danger:#9E3617;
@@ -40,6 +41,7 @@
     --accent:#5FA894;
     --accent-ink:#0E1614;
     --accent-soft:#1E2E2A;
+    --accent-strong:#5FA894;
     --warn:#D9A45C;
     --warn-soft:#2B241A;
     --danger:#E3937A;
@@ -65,6 +67,7 @@
   --accent:#5FA894;
   --accent-ink:#0E1614;
   --accent-soft:#1E2E2A;
+  --accent-strong:#5FA894;
   --warn:#D9A45C;
   --warn-soft:#2B241A;
   --danger:#E3937A;
@@ -77,6 +80,68 @@
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
   --sheet-shadow:0 -2px 32px rgba(0,0,0,.5);
 }
+
+/* 귀여운 테마. 한 가지 밝은 세계에 의도적으로 고정하므로 다크 대응을 두지
+   않는다. 다크 블록들보다 뒤에 있어야 어떤 기기 설정에서도 이긴다.
+   상태 축(mood) 색만은 기본 테마와 같은 값을 쓴다 — 그 색은 장식이 아니라
+   의미이고(docs/adr/0003), 테마에 따라 뜻이 달라지면 안 된다. */
+:root[data-skin="cute"]{
+  --ground:#FFF7F0;
+  --surface:#FFFFFF;
+  --surface-2:#FFF0E4;
+  --ink:#5A4438;
+  --ink-2:#7E6656;
+  --ink-3:#7F6A5D;
+  --line:#F2E0D2;
+  --line-2:#A87F62;
+  --accent:#FFC9B4;
+  --accent-ink:#5A4438;
+  --accent-soft:#FFEDE4;
+  --accent-strong:#B2503A;
+  --warn:#94531F;
+  --warn-soft:#FFF1DC;
+  --danger:#B24A33;
+  --danger-line:#E0B5A6;
+  --shadow:0 2px 0 #F0DCCB, 0 6px 18px rgba(122,86,62,.10);
+  --sheet-shadow:0 -2px 28px rgba(122,86,62,.20);
+}
+:root[data-skin="cute"] .name,
+:root[data-skin="cute"] .sheet-title,
+:root[data-skin="cute"] .child-name,
+:root[data-skin="cute"] .panel h3,
+:root[data-skin="cute"] .sec-title,
+:root[data-skin="cute"] .today,
+:root[data-skin="cute"] .btn,
+:root[data-skin="cute"] .btn-sm.primary,
+:root[data-skin="cute"] .stat .v{
+  font-family:'Jua','IBM Plex Sans KR',sans-serif;
+  letter-spacing:0;
+  font-weight:400;
+}
+/* 파스텔 채움은 흰 바탕과 거의 구분되지 않으므로 눌리는 것에는 테두리를 남긴다 */
+:root[data-skin="cute"] .btn,
+:root[data-skin="cute"] .btn-sm.primary,
+:root[data-skin="cute"] .slot[aria-pressed="true"],
+:root[data-skin="cute"] .tag[aria-pressed="true"]{border:1px solid var(--line-2)}
+:root[data-skin="cute"] .card{border-radius:18px;box-shadow:var(--shadow)}
+:root[data-skin="cute"] .card:active{transform:scale(.95)}
+:root[data-skin="cute"] .panel{border-radius:18px}
+:root[data-skin="cute"] .btn,
+:root[data-skin="cute"] .btn-ghost,
+:root[data-skin="cute"] .btn-sm,
+:root[data-skin="cute"] .row-in,
+:root[data-skin="cute"] .row-del,
+:root[data-skin="cute"] .row-add,
+:root[data-skin="cute"] .note-in,
+:root[data-skin="cute"] .out,
+:root[data-skin="cute"] .edit-area{border-radius:14px}
+:root[data-skin="cute"] .tag{border-radius:999px}
+:root[data-skin="cute"] .mood{border-radius:20px;padding:12px 2px 11px}
+/* 파스텔 채움끼리는 서로 비슷해서, 눌리지 않는 버튼임을 테두리로도 말해준다 */
+:root[data-skin="cute"] .btn:disabled{background:var(--surface-2);border-color:var(--line);color:var(--ink-3)}
+:root[data-skin="cute"] .sheet{border-radius:26px 26px 0 0}
+:root[data-skin="cute"] .gaps{border-radius:4px 16px 16px 4px}
+:root[data-skin="cute"] .banner{border-radius:16px}
 
 *{box-sizing:border-box}
 body{
@@ -91,7 +156,7 @@ body{
 body.locked{position:fixed;left:0;right:0;overflow:hidden;width:100%}
 button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer}
 textarea,input{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:4px}
 .mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums}
 /* 한글이 섞인 자리에는 mono 대신 tnum — Plex Mono에 한글이 없어 자간이 벌어진다 */
 .tnum{font-variant-numeric:tabular-nums}
@@ -115,6 +180,7 @@ textarea,input{font:inherit;color:inherit}
 .top-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 8px}
 .today{font-size:13px;color:var(--ink-2);letter-spacing:.02em}
 .today b{color:var(--ink);font-weight:600}
+.today .klass{color:var(--accent-strong);font-weight:600;margin-right:2px}
 .count-today{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
 .slots{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
 .slots::-webkit-scrollbar{display:none}
@@ -158,7 +224,7 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
   min-height:78px;transition:border-color .12s,transform .06s;
 }
 .card:active{transform:scale(.985)}
-.card.done{border-color:var(--accent);background:var(--accent-soft)}
+.card.done{border-color:var(--accent-strong);background:var(--accent-soft)}
 .card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .name{font-size:16px;font-weight:600;letter-spacing:-.01em}
 .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
@@ -174,7 +240,7 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 }
 .nav-inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
 .nav button{padding:11px 0 13px;font-size:12px;font-weight:500;color:var(--ink-3);display:flex;flex-direction:column;align-items:center;gap:3px}
-.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.nav button[aria-current="page"]{color:var(--accent-strong);font-weight:600}
 .nav .ico{font-size:17px;line-height:1}
 
 /* ---------- sheet ---------- */
@@ -258,7 +324,7 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 .freq-row{display:grid;grid-template-columns:1fr 34px;gap:9px;align-items:center}
 .freq-label{font-size:13.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .freq-track{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
-.freq-fill{height:100%;background:var(--accent);border-radius:3px}
+.freq-fill{height:100%;background:var(--accent-strong);border-radius:3px}
 .freq-n{font-size:12px;color:var(--ink-3);text-align:right}
 
 .log{display:flex;flex-direction:column;gap:0}
@@ -303,7 +369,7 @@ main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:22px}
 }
 .banner.warn{background:var(--warn-soft);border-color:var(--warn)}
 .banner b{color:var(--ink);font-weight:600}
-.banner button{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap;padding:6px 0}
+.banner button{font-size:13px;font-weight:600;color:var(--accent-strong);white-space:nowrap;padding:6px 0}
 .banner.warn button{color:var(--warn)}
 
 .toast{
@@ -401,7 +467,7 @@ var BACKUP_NAG_DAYS = 5;
 var S = null;
 // slotId, not an index — deleting a slot must not silently move the
 // selection onto a different one.
-var ui = { tab:"record", slotId:null, pick:null, editing:null, draft:null };
+var ui = { tab:"record", slotId:null, pick:null, editing:null, draft:null, openBulk:false };
 var storageBroken = false;
 var storageCorrupt = false;
 var lastRenderedDay = null;
@@ -430,7 +496,9 @@ function blank(){
     slots:DEFAULT_SLOTS.map(function(n){ return {id:uid(), name:n}; }),
     tags:JSON.parse(JSON.stringify(DEFAULT_TAGS)),
     entries:[],
-    lastExport:null
+    lastExport:null,
+    skin:"plain",
+    group:"우리 반"
   };
 }
 
@@ -485,6 +553,8 @@ function normalize(p){
   if (typeof p.rev !== "number") p.rev = 0;
   if (typeof p.lastExport !== "string") p.lastExport = null;
   p.demo = !!p.demo;
+  p.skin = (p.skin === "cute") ? "cute" : "plain";
+  p.group = (typeof p.group === "string" && p.group.trim()) ? p.group.trim() : "우리 반";
   return p;
 }
 
@@ -622,6 +692,12 @@ function load(){
   return demoState();
 }
 
+// 테마는 기록과 함께 저장된다 — 복원하면 쓰던 화면 그대로 돌아온다.
+function applySkin(){
+  if (S && S.skin === "cute") document.documentElement.setAttribute("data-skin", "cute");
+  else document.documentElement.removeAttribute("data-skin");
+}
+
 function renderAlert(){
   var el = document.getElementById("alertBar");
   if (storageBroken){
@@ -705,6 +781,7 @@ function renderTop(){
   var d = new Date();
   var wd = ["일","월","화","수","목","금","토"][d.getDay()];
   document.getElementById("todayLine").innerHTML =
+    '<span class="klass">' + esc(S.group) + '</span> ' +
     "<b>" + (d.getMonth()+1) + "월 " + d.getDate() + "일</b> " + wd + "요일";
   var n = 0, uniq = {};
   S.entries.forEach(function(e){ if (e.date === today()){ n++; uniq[e.childId] = 1; } });
@@ -736,7 +813,8 @@ function viewRecord(){
     bn.innerHTML = "<span><b>예시 데이터</b>로 보고 있습니다</span>";
     var b = document.createElement("button");
     b.textContent = "우리 반으로 바꾸기";
-    b.onclick = function(){ ui.tab = "data"; render(true); };
+    // 데이터 탭으로 보내는 데서 그치지 않고 붙여넣기 상자까지 펼쳐 준다.
+    b.onclick = function(){ ui.tab = "data"; ui.openBulk = true; render(true); };
     bn.appendChild(b);
     v.appendChild(bn);
   } else {
@@ -812,7 +890,7 @@ function viewRecord(){
     }
     card.innerHTML =
       '<div class="card-top"><span class="name">' + esc(c.name) + '</span>' +
-      (e ? '<span class="dot" style="background:var(--accent)"></span>' : '') + '</div>' +
+      (e ? '<span class="dot" style="background:var(--accent-strong)"></span>' : '') + '</div>' +
       '<div class="card-meta">' + meta + '</div>';
     card.onclick = function(){ openSheet(c, slot); };
     grid.appendChild(card);
@@ -831,8 +909,15 @@ function backupNag(){
     ? "아직 <b>한 번도 백업하지 않았습니다.</b>"
     : "마지막 백업이 <b>" + days + "일 전</b>입니다.") + "</span>";
   var b = document.createElement("button");
-  b.textContent = "지금 백업";
-  b.onclick = function(){ ui.tab = "data"; render(true); };
+  // One tap from the banner straight into the share sheet — routing through
+  // the data tab first is a step that stops backups from happening.
+  if (navigator.share){
+    b.textContent = "지금 보내기";
+    b.onclick = shareCSV;
+  } else {
+    b.textContent = "지금 백업";
+    b.onclick = function(){ ui.tab = "data"; render(true); };
+  }
   bn.appendChild(b);
   return bn;
 }
@@ -1153,9 +1238,12 @@ function copyText(text, label){
 }
 // iOS share sheet: two taps to hand the backup to KakaoTalk.
 function shareCSV(){
-  var csv = "﻿" + toCSV();
-  var name = "하루세아이-" + today() + ".csv";
-  var done = function(){ markExported(); render(); };
+  var body = toCSV();
+  // BOM so Excel opens the Korean columns correctly; ASCII filename so the
+  // receiving app never has to guess at the encoding of the name itself.
+  var csv = "﻿" + body;
+  var name = "haru3-" + today() + ".csv";
+  var done = function(){ markExported(); render(); toast("보냈으면 백업 완료입니다"); };
   try{
     var file = new File([csv], name, {type:"text/csv"});
     if (navigator.canShare && navigator.canShare({files:[file]})){
@@ -1163,11 +1251,13 @@ function shareCSV(){
       return;
     }
   }catch(e){}
-  if (navigator.share){
-    navigator.share({title:name, text:toCSV()}).then(done, function(){});
+  // Sending the whole CSV as a chat message risks truncation, so only fall
+  // back to text while it is short.
+  if (navigator.share && body.length < 4000){
+    navigator.share({title:name, text:body}).then(done, function(){});
     return;
   }
-  copyText(toCSV(), "CSV");
+  copyText(body, "CSV");
 }
 
 /* ---------------- data tab ---------------- */
@@ -1258,7 +1348,9 @@ function viewData(){
   v.appendChild(p0);
 
   v.appendChild(rowEditor({
-    title:"우리 반 아이들",
+    title:S.group + " 아이들",
+    groupEdit:true,
+    bulkOpen:true,
     desc:"이름을 고쳐도 그 아이의 기록은 그대로 따라갑니다. 지우면 그 아이의 기록도 함께 사라집니다.",
     list:S.children,
     addLabel:"+ 아이 추가",
@@ -1383,6 +1475,27 @@ function viewData(){
   p4.appendChild(r4);
   v.appendChild(p4);
 
+  // theme
+  var pt = document.createElement("section");
+  pt.className = "panel";
+  pt.innerHTML = "<h3>화면 테마</h3><p>색과 글꼴만 바뀝니다. 기록과 데이터는 그대로입니다.</p>";
+  var rt = document.createElement("div"); rt.className = "row-btns";
+  [["plain","기본"],["cute","말랑말랑"]].forEach(function(pair){
+    var tb = document.createElement("button");
+    tb.className = "btn-sm" + (S.skin === pair[0] ? " primary" : "");
+    tb.textContent = pair[1];
+    tb.setAttribute("aria-pressed", S.skin === pair[0] ? "true" : "false");
+    tb.onclick = function(){
+      if (S.skin === pair[0]) return;
+      var ok = mutate(function(st){ st.skin = pair[0]; });
+      render();
+      toast(ok ? pair[1] + " 테마로 바꿨습니다" : "저장되지 않았습니다");
+    };
+    rt.appendChild(tb);
+  });
+  pt.appendChild(rt);
+  v.appendChild(pt);
+
   // reset
   var p5 = document.createElement("section");
   p5.className = "panel";
@@ -1417,6 +1530,23 @@ function rowEditor(cfg){
   var p = document.createElement("section");
   p.className = "panel";
   p.innerHTML = "<h3>" + esc(cfg.title) + "</h3><p>" + cfg.desc + "</p>";
+  if (cfg.groupEdit){
+    var gl = document.createElement("div");
+    gl.className = "field-label";
+    gl.textContent = "반 이름";
+    var gi = document.createElement("input");
+    gi.className = "row-in"; gi.type = "text";
+    gi.value = S.group; gi.placeholder = "반 이름";
+    gi.setAttribute("aria-label", "반 이름");
+    gi.onchange = function(){
+      var g = gi.value.trim();
+      if (!g){ gi.value = S.group; toast("반 이름을 비울 수 없습니다"); return; }
+      var ok = mutate(function(st){ st.group = g; });
+      render(); toast(ok ? "반 이름을 바꿨습니다" : "저장되지 않았습니다");
+    };
+    p.appendChild(gl); p.appendChild(gi);
+  }
+
   var rows = document.createElement("div");
   rows.className = "rows";
   cfg.list.forEach(function(item){
@@ -1475,7 +1605,7 @@ function rowEditor(cfg){
     bulkBtn.className = "row-add"; bulkBtn.textContent = "여러 개 한 번에";
     addRow.appendChild(bulkBtn);
     var box = document.createElement("div");
-    box.hidden = true;
+    box.hidden = !(cfg.bulkOpen && ui.openBulk);
     var warn = document.createElement("p");
     warn.style.color = "var(--warn)";
     warn.style.marginTop = "10px";
@@ -1506,6 +1636,10 @@ function rowEditor(cfg){
       render(); toast(ok ? "목록을 바꿨습니다" : "저장되지 않았습니다");
     };
     box.appendChild(warn); box.appendChild(ta); box.appendChild(apply);
+    if (!box.hidden){
+      ta.value = cfg.list.map(function(it){ return it.name; }).join("\n");
+      ui.openBulk = false;
+    }
     bulkBtn.onclick = function(){
       box.hidden = !box.hidden;
       if (!box.hidden){
@@ -1529,6 +1663,7 @@ function rowEditor(cfg){
 /* ---------------- routing ---------------- */
 function render(resetScroll){
   lastRenderedDay = today();
+  applySkin();
   renderAlert();
   renderTop();
   if (ui.tab === "record") viewRecord();
@@ -1599,7 +1734,47 @@ if ("serviceWorker" in navigator){
   });
 }
 
+// 명단을 링크로 심는다: .../haru3/#names=LEO,JOSEPH,...
+// 아이 실명을 공개 저장소 코드에 넣지 않기 위한 것이다. 해시는 서버로
+// 전송되지 않으므로 이름은 링크를 받은 사람의 기기 밖으로 나가지 않는다.
+function groupFromHash(){
+  var m = (location.hash || "").match(/[#&]class=([^&]*)/);
+  if (!m) return null;
+  var raw;
+  try{ raw = decodeURIComponent(m[1].replace(/\+/g, " ")); }
+  catch(e){ raw = m[1]; }
+  raw = raw.trim();
+  return raw || null;
+}
+function namesFromHash(){
+  var m = (location.hash || "").match(/[#&]names=([^&]*)/);
+  if (!m) return null;
+  var raw;
+  try{ raw = decodeURIComponent(m[1].replace(/\+/g, " ")); }
+  catch(e){ raw = m[1]; }
+  var names = raw.split(",").map(function(x){ return x.trim(); }).filter(Boolean);
+  return names.length ? names : null;
+}
+
 S = load();
+
+var seeded = namesFromHash();
+// 이미 쓰고 있는 명단은 절대 덮지 않는다. 링크를 다시 눌러도 안전해야 한다.
+if (seeded && (S.demo || !S.children.length)){
+  var fresh = blank();
+  fresh.skin = S.skin;
+  fresh.children = seeded.map(function(n){ return {id:uid(), name:n}; });
+  var g = groupFromHash();
+  if (g) fresh.group = g;
+  bumpRev(fresh, S.rev);
+  S = fresh;
+  writeStore();
+}
+// 주소창과 공유 링크에 아이 이름이 남지 않도록 즉시 지운다.
+if (location.hash && history.replaceState){
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+}
+
 render(true);
 })();
 </script>
